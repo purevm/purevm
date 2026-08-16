@@ -1,6 +1,6 @@
 import type { HttpHeadersInit } from "./utils/headers.js";
 import type { HttpUrl, HttpsUrl } from "./utils/url.js";
-import type { TimeoutMs } from "./utils/timeout.js";
+import type { TimeoutMs } from "../../utils/timeout.js";
 
 /**
  * Parameters for the HTTP transport

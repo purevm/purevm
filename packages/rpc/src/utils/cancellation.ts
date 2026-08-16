@@ -1,4 +1,11 @@
 // ===========================================================
+// Constants
+// ===========================================================
+
+/** Largest delay Node/browsers accept; above this a timer fires immediately. */
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
+
+// ===========================================================
 // Types
 // ===========================================================
 
@@ -31,6 +38,11 @@ export function createCancellationContext(
         signal: externalSignal,
     } = options
 
+    const effectiveTimeoutMs =
+        Number.isFinite(timeoutMs) && timeoutMs > 0
+            ? Math.min(timeoutMs, MAX_TIMEOUT_MS)
+            : 0;
+
     const controller = new AbortController();
     let didTimeout = false;
 
@@ -46,21 +58,27 @@ export function createCancellationContext(
         });
     }
 
+    // An already-aborted request must not be re-labelled as a timeout, so the
+    // timer is neither armed nor allowed to overwrite an existing abort.
     const timeoutId =
-        timeoutMs > 0
+        effectiveTimeoutMs > 0 && !controller.signal.aborted
             ? setTimeout(() => {
-                didTimeout = true
-                controller.abort()
-            }, timeoutMs)
+                if (controller.signal.aborted) {
+                    return;
+                }
+                didTimeout = true;
+                controller.abort(
+                    new DOMException(
+                        `Request timed out after ${effectiveTimeoutMs}ms`,
+                        'TimeoutError',
+                    ),
+                );
+            }, effectiveTimeoutMs)
             : undefined
 
     return {
-        get signal() {
-            return controller.signal;
-        },
-        get timeoutMs() {
-            return timeoutMs;
-        },
+        signal: controller.signal,
+        timeoutMs: effectiveTimeoutMs,
         get timedOut() {
             return didTimeout;
         },

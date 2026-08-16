@@ -1,8 +1,8 @@
 import type { RpcCall, RpcMethod, RpcRequest } from "../../types/rpc.types.js";
 import { getTimeout } from "../../utils/timeout.js";
+import { isRecord, isValidId, isRpcErrorObject } from "../../utils/rpc-guards.js";
 import { RequestErrors, TransportErrors, HttpErrors, ResponseErrors } from "./errors.js";
-import { createCancellationContext } from "./utils/cancellation.js";
-import { isRecord, isValidId, isRpcErrorObject } from "./utils/response.js";
+import { createCancellationContext } from "../../utils/cancellation.js";
 import { createRequestIdGenerator, type RequestIdGenerator } from "@/utils/request-id-generator.js";
 import { TransportParametersManager } from "./transport.config.js";
 import type { TransportParameters, RequestOptions } from "./transport.types.js";

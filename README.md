@@ -1,17 +1,25 @@
-# @yog4a/purevm
+# purevm
 
-Personal PureVM helpers with small, opinionated wrappers.
+Monorepo for the `@purevm` npm scope.
 
-## Features
+## Packages
 
-## Installation
+| Package | Path | Description |
+| --- | --- | --- |
+| [`@purevm/rpc`](./packages/rpc) | `packages/rpc` | HTTP and WebSocket RPC toolkit for EVM-compatible chains |
 
-From GitHub (tagged release):
+Install packages independently:
+
 ```bash
-pnpm add github:yog4a/purevm#vX.Y.Z
-npm install github:yog4a/purevm#vX.Y.Z
+pnpm add @purevm/rpc
 ```
 
-## License
+`@purevm/wallet` will live in `packages/wallet` when it is added.
 
-This project is licensed under the **Creative Commons Attribution–NonCommercial 4.0 International License (CC BY-NC 4.0)**. You’re free to use and modify it for personal or open-source projects, **but commercial use is not allowed**.
+## Development
+
+```bash
+pnpm install
+pnpm build
+pnpm test
+```

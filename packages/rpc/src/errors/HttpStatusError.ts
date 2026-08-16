@@ -4,7 +4,7 @@
  * A valid JSON-RPC error takes precedence and is represented by
  * {@link RpcProviderError}, even when returned with a 4xx or 5xx status.
  */
-export class RpcHttpStatusError extends Error {
+export class HttpStatusError extends Error {
     override readonly name = this.constructor.name;
     readonly statusText: string;
     readonly status: number;
