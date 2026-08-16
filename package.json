@@ -1,6 +1,6 @@
 {
   "name": "@yog4a/purevm",
-  "description": "Personal encapsulation module for purevm",
+  "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM blockchains.",
   "version": "0.0.1",
   "type": "module",
   "main": "./dist/index.cjs",
