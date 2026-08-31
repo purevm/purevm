@@ -1,13 +1,7 @@
-/**
- * Error class for WebSocket connection errors
- */
-export class WebSocketConnectionError extends Error {
-    override readonly name = this.constructor.name;
+import { TransportError } from "./TransportError.js";
 
-    constructor(args: {
-        readonly message: string;
-        readonly cause?: unknown;
-    }) {
-        super(args.message, { cause: args.cause });
-    }
+export class WebSocketConnectionError extends TransportError {
+  constructor(message = "WebSocket connection failed.", cause?: unknown) {
+    super(message, { cause, code: "WEBSOCKET_CONNECTION", retryable: true });
+  }
 }

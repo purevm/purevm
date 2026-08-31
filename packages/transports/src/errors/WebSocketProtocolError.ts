@@ -1,17 +1,10 @@
-export class WebSocketProtocolError extends Error {
-    public override readonly name = this.constructor.name;
-    public readonly raw?: string;
+import { RpcResponseError } from "./RpcResponseError.js";
 
-    constructor(args: {
-        readonly message: string;
-        readonly raw?: string;
-        readonly cause?: unknown;
-    }) {
-        super(args.message, { cause: args.cause });
-        this.raw = args.raw;
-    }
+export class WebSocketProtocolError extends RpcResponseError {
+  readonly raw: string | undefined;
 
-    public get retryable(): boolean {
-        return false;
-    }
+  constructor(message: string, response: unknown, raw?: string, cause?: unknown) {
+    super(message, response, cause, "WEBSOCKET_PROTOCOL");
+    this.raw = raw;
+  }
 }

@@ -1,35 +1,27 @@
-import type { JsonRpcErrorObject } from '../types.js';
+import {
+  getRpcErrorDefinition,
+  isRetryableRpcErrorCode,
+  type KnownRpcErrorName,
+} from "../constants/index.js";
+import type { RpcErrorObject } from "../types.js";
+import { TransportError } from "./TransportError.js";
 
-/**
- * The provider returned a valid JSON-RPC error envelope for the request.
- *
- * The provider's numeric code, message, and optional data are preserved even
- * when the envelope is returned with a non-successful HTTP status.
- */
-export class RpcProviderError extends Error {
-    override readonly name = this.constructor.name;
+export class RpcProviderError extends TransportError {
+  readonly rpcCode: number;
+  readonly rpcData: unknown;
+  readonly rpcMessage: string;
+  readonly rpcName: KnownRpcErrorName | undefined;
 
-    readonly rpcMessage: string;
-    readonly rpcCode: number;
-    readonly rpcData?: unknown;
-
-    constructor(args: {
-        error: JsonRpcErrorObject;
-    }) {
-        super(`RPC error ${args.error.code}: ${args.error.message}`, {
-            cause: args.error 
-        });
-        this.rpcCode = args.error.code;
-        this.rpcMessage = args.error.message;
-        this.rpcData = args.error.data;
-    }
-
-    get retryable(): boolean {
-        return (
-            this.rpcCode === -32603 || // internal error
-            this.rpcCode === -32002 || // resource unavailable
-            this.rpcCode === -32005 || // limit exceeded
-            this.rpcCode === 429       // rate limit, if provider uses it as RPC code
-        );
-    }
+  constructor(error: RpcErrorObject) {
+    const definition = getRpcErrorDefinition(error.code);
+    super(`RPC error ${error.code}: ${error.message}`, {
+      cause: error,
+      code: "RPC_PROVIDER",
+      retryable: isRetryableRpcErrorCode(error.code),
+    });
+    this.rpcCode = error.code;
+    this.rpcData = error.data;
+    this.rpcMessage = error.message;
+    this.rpcName = definition?.name;
+  }
 }

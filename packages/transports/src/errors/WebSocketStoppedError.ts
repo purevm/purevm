@@ -1,10 +1,7 @@
-export class WebSocketStoppedError extends Error {
-    public override readonly name = this.constructor.name;
+import { WebSocketClosedError } from "./WebSocketClosedError.js";
 
-    constructor(args: {
-        readonly message: string;
-        readonly cause?: unknown;
-    }) {
-        super(args.message, { cause: args.cause });
-    }
+export class WebSocketStoppedError extends WebSocketClosedError {
+  constructor(message = "WebSocket transport is stopped.", cause?: unknown) {
+    super(message, cause, "WEBSOCKET_STOPPED");
+  }
 }

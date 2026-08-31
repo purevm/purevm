@@ -1,20 +1,7 @@
-/**
- * The caller explicitly cancelled the request before its response was fully read.
- *
- * Client-enforced request deadlines are represented by {@link RpcTimeoutError}.
- */
-export class RpcAbortError extends Error {
-    override readonly name = this.constructor.name;
+import { TransportError } from "./TransportError.js";
 
-    constructor(args: {
-        cause?: unknown;
-    }) {
-        super(`Request was aborted.`, {
-            cause: args.cause 
-        });
-    }
-
-    get retryable(): boolean {
-        return false;
-    }
+export class RpcAbortError extends TransportError {
+  constructor(cause?: unknown) {
+    super("RPC request aborted.", { cause, code: "RPC_ABORTED", retryable: false });
+  }
 }

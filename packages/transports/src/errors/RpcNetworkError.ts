@@ -1,21 +1,11 @@
-/**
- * The request or response body stream failed because of an underlying network
- * or transport problem, leaving no complete response to process.
- *
- * Examples include DNS failures, refused connections, and interrupted sockets.
- */
-export class RpcNetworkError extends Error {
-    override readonly name = this.constructor.name;
+import { TransportError } from "./TransportError.js";
 
-    constructor(args: {
-        cause?: unknown;
-    }) {
-        super(`Network request failed`, {
-            cause: args.cause 
-        });
-    }
-
-    get retryable(): boolean {
-        return true;
-    }
+export class RpcNetworkError extends TransportError {
+  constructor(cause?: unknown) {
+    super("RPC network request failed.", {
+      cause,
+      code: "RPC_NETWORK",
+      retryable: true,
+    });
+  }
 }

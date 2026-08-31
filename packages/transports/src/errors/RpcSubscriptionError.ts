@@ -1,10 +1,9 @@
-export class SubscriptionError extends Error {
-    public override readonly name = this.constructor.name;
+import { RpcResponseError } from "./RpcResponseError.js";
 
-    constructor(args: {
-        readonly message: string;
-        readonly cause?: unknown;
-    }) {
-        super(args.message, { cause: args.cause });
-    }
+export class RpcSubscriptionError extends RpcResponseError {
+  constructor(message: string, response: unknown, cause?: unknown) {
+    super(message, response, cause, "RPC_SUBSCRIPTION");
+  }
 }
+
+export { RpcSubscriptionError as SubscriptionError };

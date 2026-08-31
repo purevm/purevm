@@ -1,0 +1,13 @@
+# Folder
+coverage/
+dist/
+node_modules/
+
+# Files
+.env
+.env.local
+.DS_Store
+
+# Other package managers
+package-lock.json
+yarn.lock

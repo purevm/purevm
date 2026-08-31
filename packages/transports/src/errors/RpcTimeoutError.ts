@@ -1,22 +1,14 @@
-/**
- * The configured client deadline elapsed before the complete response was read.
- *
- * This is a client-enforced timeout, not an explicit caller cancellation or an
- * HTTP timeout status returned by the endpoint.
- */
-export class RpcTimeoutError extends Error {
-    override readonly name = this.constructor.name;
+import { TransportError } from "./TransportError.js";
 
-    constructor(args: {
-        timeout: number;
-        cause?: unknown;
-    }) {
-        super(`Request timed out after ${args.timeout}ms.`, {
-            cause: args.cause 
-        });
-    }
+export class RpcTimeoutError extends TransportError {
+  readonly timeoutMs: number;
 
-    get retryable(): boolean {
-        return true;
-    }
+  constructor(timeoutMs: number, cause?: unknown) {
+    super(`RPC request timed out after ${timeoutMs}ms.`, {
+      cause,
+      code: "RPC_TIMEOUT",
+      retryable: true,
+    });
+    this.timeoutMs = timeoutMs;
+  }
 }

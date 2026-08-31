@@ -1,52 +1,58 @@
-export type {
-    Hex,
-    Hash,
-    Address,
-    Quantity,
-    Index,
-    BlockTag,
-    BlockHash,
-    BlockNumber,
-    TransactionHash
-} from './types/shared.types.js';
-export type {
-    JsonPrimitive,
-    JsonArray,
-    JsonObject,
-    JsonValue,
-} from "./types/json.types.js";
-export type {
-    RpcId,
-    RpcParams,
-    RpcMethod,
-    RpcRequest,
-    RpcErrorObject,
-    RpcResponseSuccess,
-    RpcResponseFailure,
-    RpcCall,
-    SubscriptionNotification,
-} from "./types/rpc.types.js";
-export type {
-    Withdrawal,
-    RpcBlock,
-    RpcLog,
-    RpcTransactionReceipt,
-    RpcReceiptStatus,
-    RpcTransactionType,
-    AccessList,
-    RpcAuthorization,
-    RpcTransactionBase,
-    RpcTransactionLegacy,
-    RpcTransactionEIP2930,
-    RpcTransactionEIP1559,
-    RpcTransactionEIP4844,
-    RpcTransactionEIP7702,
-    RpcTransaction,
-} from './api/types.js';
-export type {
-    TraceCallEntry,
-    TraceCreateEntry,
-    TraceSuicideEntry,
-    TraceRewardEntry,
-    TraceEntry,
-} from './api/types.js';
+export type JsonPrimitive = boolean | null | number | string;
+
+export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+
+export type RpcId = number | string | null;
+
+export type RpcParams = readonly JsonValue[] | { readonly [key: string]: JsonValue };
+
+export type RpcMethod = {
+  method: string;
+  params?: RpcParams | undefined;
+  result: unknown;
+};
+
+export type RpcCall<method extends RpcMethod> = {
+  method: method["method"];
+} & (undefined extends method["params"]
+  ? { params?: method["params"] | undefined }
+  : { params: method["params"] });
+
+export type RpcRequest = {
+  id: number;
+  jsonrpc: "2.0";
+  method: string;
+  params?: RpcParams | undefined;
+};
+
+export type RpcErrorObject = {
+  code: number;
+  message: string;
+  data?: unknown;
+};
+
+export type RetryOptions = {
+  retries?: number;
+  delayMs?: number;
+  maxDelayMs?: number;
+  factor?: number;
+  shouldRetry?: (error: unknown, attempt: number) => boolean;
+};
+
+export type TransportOptions = {
+  timeoutMs?: number;
+  retry?: false | RetryOptions;
+};
+
+export type RequestOptions = {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+  retry?: false | RetryOptions;
+};
+
+export interface Transport {
+  request<method extends RpcMethod>(
+    call: RpcCall<method>,
+    options?: RequestOptions,
+  ): Promise<method["result"]>;
+}
