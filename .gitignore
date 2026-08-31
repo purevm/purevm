@@ -1,7 +1,12 @@
-# Dependencies
+# Build output
 dist/
-modules/
+coverage/
+
+# Dependencies
 node_modules/
+
+# Scratch / not part of the workspace
+modules/
 
 # Env and logs
 .env
@@ -14,5 +19,3 @@ node_modules/
 # Other package managers
 package-lock.json
 yarn.lock
-
-# Backup
