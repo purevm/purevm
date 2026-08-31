@@ -3,16 +3,19 @@
     "biome.suggestInstallingGlobally": false,
     "json.schemaDownload.enable": true,
     "editor.defaultFormatter": "oxc.oxc-vscode",
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
+    "editor.formatOnSaveMode": "file",
     "editor.tabSize": 4,
     "editor.insertSpaces": true,
     "editor.detectIndentation": false,
     "editor.codeActionsOnSave": {
-        "source.fixAll.oxc": "explicit"
+        "source.format.oxc": "always",
+        "source.fixAll.oxc": "always"
     },
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.enablePromptUseWorkspaceTsdk": true,
     "prettier.enable": false,
+    "eslint.enable": false,
     "[json]": {
         "editor.defaultFormatter": "oxc.oxc-vscode",
         "editor.tabSize": 4
