@@ -1,6 +1,6 @@
 import { expect, expectTypeOf, test } from "vitest";
 
-import type { RpcTransaction } from "../../types/eth.js";
+import type { RpcTransaction } from "../../actions/eth/types.js";
 import { createWebSocketClient } from "../websocket-client.js";
 import { FakeWebSocket } from "./fake-websocket.js";
 

@@ -10,10 +10,12 @@ import {
   traceBlockByHash,
   traceBlockByNumber,
   traceFilter,
+  type CallTracerConfig,
+  type DebugBlockTrace,
+  type TraceEntry,
+  type TraceFilterParameters,
 } from "../actions/index.js";
-import type { CallTracerConfig, DebugBlockTrace } from "../types/debug.js";
 import type { BlockHash, BlockNumberOrTag } from "../types/primitives.js";
-import type { TraceEntry, TraceFilterParameters } from "../types/trace.js";
 import { BaseClient } from "./base-client.js";
 
 export class HttpClient extends BaseClient<HttpRequestOptions> {

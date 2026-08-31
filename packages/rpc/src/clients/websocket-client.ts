@@ -5,13 +5,13 @@ import {
   type WebSocketTransportOptions,
 } from "@purevm/transports";
 
-import type { LogsSubscriptionFilter } from "../types/eth.js";
 import type {
+  LogsSubscriptionFilter,
   LogsSubscriptionResult,
   NewHeadsSubscriptionResult,
   PendingTransactionSubscriptionResult,
   SyncingSubscriptionResult,
-} from "../types/subscriptions.js";
+} from "../actions/eth/index.js";
 import { BaseClient } from "./base-client.js";
 
 export type SubscriptionHandlers<result> = {

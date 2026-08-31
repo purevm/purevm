@@ -17,15 +17,13 @@ import {
   type AccountAtBlockParameters,
   type GetBlockByHashParameters,
   type GetBlockByNumberParameters,
+  type LogsByHashFilter,
+  type LogsByRangeFilter,
+  type RpcBlock,
+  type RpcLog,
+  type RpcTransaction,
+  type RpcTransactionReceipt,
 } from "../actions/index.js";
-import type {
-  LogsByHashFilter,
-  LogsByRangeFilter,
-  RpcBlock,
-  RpcLog,
-  RpcTransaction,
-  RpcTransactionReceipt,
-} from "../types/eth.js";
 import type {
   BlockHash,
   BlockNumberOrTag,
