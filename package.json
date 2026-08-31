@@ -1,5 +1,6 @@
 {
     "name": "purevm",
+    "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM blockchains.",
     "private": true,
     "scripts": {
         "build": "pnpm -r --if-present build",
