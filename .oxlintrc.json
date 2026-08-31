@@ -1,0 +1,21 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "ignorePatterns": [
+        "**/dist/**",
+        "**/coverage/**",
+        "**/.cache/**",
+        "**/generated.ts",
+        "**/vectors/**/*.json",
+        "**/test/kzg/**/*.json",
+        "**/test/kzg/**/*.txt"
+    ],
+    "rules": {
+        "no-cond-assign": "off",
+        "no-console": "error",
+        "no-unused-vars": "error",
+        "typescript/array-type": ["error", { "default": "array" }],
+        "typescript/no-explicit-any": "off",
+        "typescript/no-invalid-void-type": "off",
+        "typescript/no-non-null-assertion": "off"
+    }
+}

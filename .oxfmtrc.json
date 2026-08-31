@@ -1,0 +1,27 @@
+{
+    "$schema": "./node_modules/oxfmt/configuration_schema.json",
+    "ignorePatterns": [
+        "**/dist/**",
+        "**/coverage/**",
+        "**/.cache/**",
+        "**/generated.ts",
+        "**/vectors/**/*.json",
+        "**/test/kzg/**/*.json",
+        "**/test/kzg/**/*.txt"
+    ],
+    "printWidth": 100,
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": false,
+    "semi": true,
+    "trailingComma": "all",
+    "sortImports": true,
+    "overrides": [
+        {
+            "files": ["*.json", "*.jsonc", "**/*.json", "**/*.jsonc"],
+            "options": {
+                "tabWidth": 4
+            }
+        }
+    ]
+}
