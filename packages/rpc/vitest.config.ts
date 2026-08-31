@@ -5,7 +5,7 @@ export default defineConfig({
     coverage: {
       exclude: ["src/**/__tests__/**", "src/**/index.ts", "src/types/**"],
       include: [
-        "src/actions/*.ts",
+        "src/actions/**/*.ts",
         "src/clients/base-client.ts",
         "src/clients/http-client.ts",
         "src/clients/websocket-client.ts",
