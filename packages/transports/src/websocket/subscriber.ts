@@ -72,7 +72,9 @@ export class SubscriptionManager {
   }
 
   async restore(): Promise<void> {
+    let firstError: Error | undefined;
     for (const record of this.subscriptions.values()) {
+      if (record.id) continue;
       try {
         const id = await this.subscribeRequest(record.params);
         if (typeof id !== "string") throw new RpcSubscriptionError("Invalid subscription id.", id);
@@ -80,9 +82,10 @@ export class SubscriptionManager {
       } catch (error) {
         const normalized = normalizeError(error);
         record.onError?.(normalized);
-        this.onError(normalized);
+        firstError ??= normalized;
       }
     }
+    if (firstError) throw firstError;
   }
 }
 

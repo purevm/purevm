@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { RpcResponseError } from "../../errors/index.js";
+import { RpcResponseError, WebSocketProtocolError } from "../../errors/index.js";
 import { parseWebSocketMessage } from "../message.js";
 
 test("parses response and subscription messages", () => {
@@ -36,5 +36,12 @@ test.each([
     }),
   ],
 ])("rejects %s", (_name, data) => {
+  expect(() => parseWebSocketMessage(data)).toThrow(WebSocketProtocolError);
   expect(() => parseWebSocketMessage(data)).toThrow(RpcResponseError);
+});
+
+test("preserves the raw invalid message", () => {
+  expect(() => parseWebSocketMessage("{")).toThrowError(
+    expect.objectContaining({ code: "WEBSOCKET_PROTOCOL", raw: "{" }),
+  );
 });

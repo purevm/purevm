@@ -1,8 +1,4 @@
-import {
-  RpcIdMismatchError,
-  RpcInvalidResponseError,
-  RpcProviderError,
-} from "../errors/index.js";
+import { RpcIdMismatchError, RpcInvalidResponseError, RpcProviderError } from "../errors/index.js";
 import type { RpcErrorObject, RpcId } from "../types.js";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {

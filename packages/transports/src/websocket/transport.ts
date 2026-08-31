@@ -159,8 +159,11 @@ export class WebSocketTransport implements Transport {
   private scheduleReconnect(): void {
     if (this.reconnecting || this.stopped) return;
     const retry = resolveRetry(this.options, {});
-    const reconnecting = withRetry(() => this.connect(), retry)
-      .then(() => this.subscriber.restore())
+    const reconnectRetry = retry === false ? false : { ...retry, shouldRetry: () => true };
+    const reconnecting = withRetry(async () => {
+      await this.connect();
+      await this.subscriber.restore();
+    }, reconnectRetry)
       .catch((error: unknown) => this.report(normalizeError(error)))
       .finally(() => {
         if (this.reconnecting === reconnecting) this.reconnecting = undefined;

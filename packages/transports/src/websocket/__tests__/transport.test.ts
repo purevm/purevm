@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { WebSocketClosedError } from "../../errors/index.js";
+import { WebSocketClosedError, WebSocketStoppedError } from "../../errors/index.js";
 import { WebSocketTransport } from "../transport.js";
 import { FakeWebSocket } from "./fake-websocket.js";
 
@@ -62,6 +62,44 @@ test("reconnects and restores subscriptions", async () => {
   transport.close();
 });
 
+test("retries failed subscription restoration", async () => {
+  const errors: Error[] = [];
+  const sockets: FakeWebSocket[] = [];
+  let restoreAttempts = 0;
+  const transport = new WebSocketTransport({
+    url: "ws://rpc.example.com",
+    createWebSocket: () => {
+      const socket = new FakeWebSocket({
+        onSend: (request, current) => {
+          if (request.method !== "eth_subscribe") {
+            queueMicrotask(() => current.respond(request.id, true));
+            return;
+          }
+          restoreAttempts += 1;
+          const result = restoreAttempts === 2 ? 123 : `subscription-${restoreAttempts}`;
+          queueMicrotask(() => current.respond(request.id, result));
+        },
+      });
+      sockets.push(socket);
+      return socket;
+    },
+    onError: (error) => errors.push(error),
+    retry: { delayMs: 0, retries: 2 },
+  });
+  const subscription = await transport.subscribe({
+    params: ["newHeads"],
+    onData: () => undefined,
+    onError: (error) => errors.push(error),
+  });
+
+  sockets[0]?.disconnect();
+  await waitFor(() => subscription.id === "subscription-3");
+
+  expect(restoreAttempts).toBe(3);
+  expect(errors).toHaveLength(1);
+  transport.close();
+});
+
 test("rejects pending and future requests when closed", async () => {
   const socket = new FakeWebSocket({ onSend: () => undefined });
   const transport = new WebSocketTransport({
@@ -76,11 +114,11 @@ test("rejects pending and future requests when closed", async () => {
 
   await expect(pending).rejects.toBeInstanceOf(WebSocketClosedError);
   await expect(transport.request<ChainId>({ method: "eth_chainId" })).rejects.toBeInstanceOf(
-    WebSocketClosedError,
+    WebSocketStoppedError,
   );
   await expect(
     transport.subscribe({ params: ["newHeads"], onData: () => undefined }),
-  ).rejects.toBeInstanceOf(WebSocketClosedError);
+  ).rejects.toBeInstanceOf(WebSocketStoppedError);
 });
 
 async function waitFor(predicate: () => boolean): Promise<void> {

@@ -200,29 +200,43 @@ All package errors extend [`TransportError`](#exports). Every error includes a s
 import {
   HttpStatusError,
   RpcAbortError,
+  RpcIdMismatchError,
+  RpcInvalidResponseError,
   RpcNetworkError,
+  RpcParseBodyError,
   RpcProviderError,
   RpcResponseError,
   RpcSerializationError,
+  RpcSubscriptionError,
   RpcTimeoutError,
+  RpcUnsubscribeError,
   TransportError,
   WebSocketClosedError,
   WebSocketConnectionError,
+  WebSocketProtocolError,
+  WebSocketStoppedError,
   isRetryableError,
 } from "@purevm/transports";
 ```
 
 | Error                      | Code                   | Default Retry    | Extra Data                                    |
 | -------------------------- | ---------------------- | ---------------- | --------------------------------------------- |
-| `HttpStatusError`          | `HTTP_STATUS`          | Status-dependent | `status`, `statusName`, `body`                |
+| `HttpStatusError`          | `HTTP_STATUS`          | Status-dependent | `status`, `statusName`, `statusText`, `body`  |
 | `RpcAbortError`            | `RPC_ABORTED`          | No               | Caller abort reason in `cause`                |
+| `RpcIdMismatchError`       | `RPC_ID_MISMATCH`      | No               | `expectedId`, `responseId`, `response`        |
+| `RpcInvalidResponseError`  | `RPC_INVALID_RESPONSE` | No               | Invalid value in `response`                   |
 | `RpcNetworkError`          | `RPC_NETWORK`          | Yes              | Network failure in `cause`                    |
+| `RpcParseBodyError`        | `RPC_PARSE_BODY`       | No               | Invalid body in `body` and `response`         |
 | `RpcProviderError`         | `RPC_PROVIDER`         | Code-dependent   | `rpcCode`, `rpcName`, `rpcMessage`, `rpcData` |
 | `RpcResponseError`         | `RPC_RESPONSE`         | No               | Invalid value in `response`                   |
 | `RpcSerializationError`    | `RPC_SERIALIZATION`    | No               | Serialization failure in `cause`              |
+| `RpcSubscriptionError`     | `RPC_SUBSCRIPTION`     | No               | Invalid value in `response`                   |
 | `RpcTimeoutError`          | `RPC_TIMEOUT`          | Yes              | `timeoutMs`                                   |
+| `RpcUnsubscribeError`      | `RPC_UNSUBSCRIBE`      | No               | Invalid value in `response`                   |
 | `WebSocketClosedError`     | `WEBSOCKET_CLOSED`     | No               | None                                          |
 | `WebSocketConnectionError` | `WEBSOCKET_CONNECTION` | Yes              | Connection failure in `cause`                 |
+| `WebSocketProtocolError`   | `WEBSOCKET_PROTOCOL`   | No               | `raw`, invalid value in `response`            |
+| `WebSocketStoppedError`    | `WEBSOCKET_STOPPED`    | No               | None                                          |
 
 Use `instanceof` when handling a specific failure. Use
 [`isRetryableError`](#exports) when only retry classification matters.

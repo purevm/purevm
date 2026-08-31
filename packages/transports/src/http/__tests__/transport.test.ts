@@ -2,9 +2,11 @@ import { expect, test } from "vitest";
 
 import {
   HttpStatusError,
+  RpcIdMismatchError,
+  RpcInvalidResponseError,
   RpcNetworkError,
+  RpcParseBodyError,
   RpcProviderError,
-  RpcResponseError,
   RpcSerializationError,
 } from "../../errors/index.js";
 import { HttpTransport } from "../transport.js";
@@ -129,19 +131,18 @@ test("preserves provider errors returned with an HTTP error status", async () =>
 });
 
 test.each([
-  ["invalid JSON", "not-json"],
-  ["invalid envelope", JSON.stringify({ jsonrpc: "2.0", result: "0x1" })],
-  ["mismatched id", JSON.stringify({ id: 999, jsonrpc: "2.0", result: "0x1" })],
-])("rejects %s responses", async (_name, body) => {
+  ["invalid JSON", "not-json", RpcParseBodyError],
+  ["invalid envelope", JSON.stringify({ jsonrpc: "2.0", result: "0x1" }), RpcInvalidResponseError],
+  ["mismatched id", JSON.stringify({ id: 999, jsonrpc: "2.0", result: "0x1" }), RpcIdMismatchError],
+])("rejects %s responses", async (_name, body, ErrorClass) => {
   const transport = new HttpTransport({
     url: "https://rpc.example.com",
     retry: false,
     fetch: async () => new Response(body),
   });
 
-  await expect(transport.request<ChainId>({ method: "eth_chainId" })).rejects.toBeInstanceOf(
-    RpcResponseError,
-  );
+  const request = transport.request<ChainId>({ method: "eth_chainId" });
+  await expect(request).rejects.toBeInstanceOf(ErrorClass);
 });
 
 test("retries network failures", async () => {

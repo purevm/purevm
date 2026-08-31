@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { RpcResponseError } from "../../errors/index.js";
+import { RpcSubscriptionError, RpcUnsubscribeError } from "../../errors/index.js";
 import { WebSocketTransport } from "../transport.js";
 import { FakeWebSocket } from "./fake-websocket.js";
 
@@ -12,7 +12,24 @@ test("rejects invalid subscription ids", async () => {
 
   await expect(
     transport.subscribe({ params: ["newHeads"], onData: () => undefined }),
-  ).rejects.toBeInstanceOf(RpcResponseError);
+  ).rejects.toBeInstanceOf(RpcSubscriptionError);
+  transport.close();
+});
+
+test("rejects an unsuccessful unsubscribe response", async () => {
+  const socket = new FakeWebSocket({
+    onSend: (request, current) =>
+      queueMicrotask(() =>
+        current.respond(request.id, request.method === "eth_subscribe" ? "subscription-1" : false),
+      ),
+  });
+  const transport = createTransport(socket);
+  const subscription = await transport.subscribe({
+    params: ["newHeads"],
+    onData: () => undefined,
+  });
+
+  await expect(subscription.unsubscribe()).rejects.toBeInstanceOf(RpcUnsubscribeError);
   transport.close();
 });
 
