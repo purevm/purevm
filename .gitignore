@@ -1,8 +1,7 @@
 # Dependencies
-node_modules/
-
-# Build
 dist/
+modules/
+node_modules/
 
 # Env and logs
 .env
@@ -17,8 +16,3 @@ package-lock.json
 yarn.lock
 
 # Backup
-backup
-**/backup*
-**/*backup*
-**/backups*
-**/*backups*
