@@ -15,3 +15,10 @@ dist/
 # Other package managers
 package-lock.json
 yarn.lock
+
+# Backup
+backup
+**/backup*
+**/*backup*
+**/backups*
+**/*backups*
