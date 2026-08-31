@@ -13,7 +13,7 @@
 
 - Sort reusable RPC actions into `src/actions/eth/`, `net/`, `debug/`, and `trace/`.
 - Put client bindings in `src/clients/`.
-- Keep files focused by domain. Split files before they become difficult to scan.
+- Give every exported action its own same-name file.
 - Export public APIs from the nearest `index.ts`, then from `src/index.ts`.
 - Use `.js` extensions in TypeScript relative imports.
 

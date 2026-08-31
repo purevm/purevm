@@ -77,12 +77,3 @@ export type TraceRewardEntry = TraceBlockBase & {
 };
 
 export type TraceEntry = TraceCallEntry | TraceCreateEntry | TraceRewardEntry | TraceSuicideEntry;
-
-export type TraceFilterParameters = {
-  after?: number;
-  count?: number;
-  fromAddress?: readonly Address[];
-  fromBlock?: import("./primitives.js").BlockNumberOrTag;
-  toAddress?: readonly Address[];
-  toBlock?: import("./primitives.js").BlockNumberOrTag;
-};

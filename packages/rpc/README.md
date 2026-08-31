@@ -22,7 +22,7 @@ const client = createHttpClient({
 
 const blockNumber = await client.ethBlockNumber();
 const block = await client.ethGetBlockByNumber({
-  blockNumber: "latest",
+  blockNumber: "0x10",
   includeTransactions: true,
 });
 
@@ -34,8 +34,8 @@ if (block) {
 ```
 
 `includeTransactions: true` returns `RpcTransaction[]`. Omitting it or passing `false` returns
-transaction hashes. Block selectors accept hexadecimal block numbers plus `earliest`, `finalized`,
-`latest`, `pending`, and `safe`.
+transaction hashes. `ByNumber` methods accept hexadecimal block numbers. `ByTag` methods accept
+`earliest`, `finalized`, `latest`, `pending`, or `safe`.
 
 ### HTTP Methods
 
@@ -46,8 +46,10 @@ transaction hashes. Block selectors accept hexadecimal block numbers plus `earli
 | `ethGetBalance`               | `eth_getBalance`            |
 | `ethGetBlockByHash`           | `eth_getBlockByHash`        |
 | `ethGetBlockByNumber`         | `eth_getBlockByNumber`      |
+| `ethGetBlockByTag`            | `eth_getBlockByNumber`      |
 | `ethGetBlockReceiptsByHash`   | `eth_getBlockReceipts`      |
 | `ethGetBlockReceiptsByNumber` | `eth_getBlockReceipts`      |
+| `ethGetBlockReceiptsByTag`    | `eth_getBlockReceipts`      |
 | `ethGetCode`                  | `eth_getCode`               |
 | `ethGetLogsByHash`            | `eth_getLogs`               |
 | `ethGetLogsByRange`           | `eth_getLogs`               |
@@ -56,8 +58,10 @@ transaction hashes. Block selectors accept hexadecimal block numbers plus `earli
 | `netVersion`                  | `net_version`               |
 | `debugTraceBlockByHash`       | `debug_traceBlockByHash`    |
 | `debugTraceBlockByNumber`     | `debug_traceBlockByNumber`  |
+| `debugTraceBlockByTag`        | `debug_traceBlockByNumber`  |
 | `traceBlockByHash`            | `trace_block`               |
 | `traceBlockByNumber`          | `trace_block`               |
+| `traceBlockByTag`             | `trace_block`               |
 | `traceFilter`                 | `trace_filter`              |
 
 All `debug_*` and `trace_*` methods are intentionally HTTP-only. They are absent from

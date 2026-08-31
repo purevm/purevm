@@ -7,15 +7,17 @@ import {
 import {
   debugTraceBlockByHash,
   debugTraceBlockByNumber,
+  debugTraceBlockByTag,
   traceBlockByHash,
   traceBlockByNumber,
+  traceBlockByTag,
   traceFilter,
   type CallTracerConfig,
   type DebugBlockTrace,
   type TraceEntry,
   type TraceFilterParameters,
 } from "../actions/index.js";
-import type { BlockHash, BlockNumberOrTag } from "../types/primitives.js";
+import type { BlockHash, BlockNumber, BlockTag } from "../types/primitives.js";
 import { BaseClient } from "./base-client.js";
 
 export class HttpClient extends BaseClient<HttpRequestOptions> {
@@ -32,11 +34,19 @@ export class HttpClient extends BaseClient<HttpRequestOptions> {
   }
 
   debugTraceBlockByNumber(
-    blockNumber: BlockNumberOrTag,
+    blockNumber: BlockNumber,
     config?: CallTracerConfig,
     options?: HttpRequestOptions,
   ): Promise<DebugBlockTrace[]> {
     return debugTraceBlockByNumber(this.requester, blockNumber, config, options);
+  }
+
+  debugTraceBlockByTag(
+    blockTag: BlockTag,
+    config?: CallTracerConfig,
+    options?: HttpRequestOptions,
+  ): Promise<DebugBlockTrace[]> {
+    return debugTraceBlockByTag(this.requester, blockTag, config, options);
   }
 
   traceBlockByHash(blockHash: BlockHash, options?: HttpRequestOptions): Promise<TraceEntry[]> {
@@ -44,10 +54,14 @@ export class HttpClient extends BaseClient<HttpRequestOptions> {
   }
 
   traceBlockByNumber(
-    blockNumber: BlockNumberOrTag,
+    blockNumber: BlockNumber,
     options?: HttpRequestOptions,
   ): Promise<TraceEntry[]> {
     return traceBlockByNumber(this.requester, blockNumber, options);
+  }
+
+  traceBlockByTag(blockTag: BlockTag, options?: HttpRequestOptions): Promise<TraceEntry[]> {
+    return traceBlockByTag(this.requester, blockTag, options);
   }
 
   traceFilter(filter: TraceFilterParameters, options?: HttpRequestOptions): Promise<TraceEntry[]> {

@@ -6,17 +6,21 @@ import {
   ethGetBalance,
   ethGetBlockByHash,
   ethGetBlockByNumber,
+  ethGetBlockByTag,
   ethGetBlockReceiptsByHash,
   ethGetBlockReceiptsByNumber,
+  ethGetBlockReceiptsByTag,
   ethGetCode,
   ethGetLogsByHash,
   ethGetLogsByRange,
   ethGetTransactionByHash,
   ethGetTransactionReceipt,
   netVersion,
-  type AccountAtBlockParameters,
-  type GetBlockByHashParameters,
-  type GetBlockByNumberParameters,
+  type EthGetBalanceParameters,
+  type EthGetBlockByHashParameters,
+  type EthGetBlockByNumberParameters,
+  type EthGetBlockByTagParameters,
+  type EthGetCodeParameters,
   type LogsByHashFilter,
   type LogsByRangeFilter,
   type RpcBlock,
@@ -26,7 +30,8 @@ import {
 } from "../actions/index.js";
 import type {
   BlockHash,
-  BlockNumberOrTag,
+  BlockNumber,
+  BlockTag,
   Hex,
   Quantity,
   TransactionHash,
@@ -48,22 +53,29 @@ export class BaseClient<options extends RequestOptions> {
     return ethChainId(this.requester, options);
   }
 
-  ethGetBalance(parameters: AccountAtBlockParameters, options?: options): Promise<Quantity> {
+  ethGetBalance(parameters: EthGetBalanceParameters, options?: options): Promise<Quantity> {
     return ethGetBalance(this.requester, parameters, options);
   }
 
   ethGetBlockByHash<const full extends boolean = false>(
-    parameters: GetBlockByHashParameters<full>,
+    parameters: EthGetBlockByHashParameters<full>,
     options?: options,
   ): Promise<RpcBlock<full> | null> {
     return ethGetBlockByHash(this.requester, parameters, options);
   }
 
   ethGetBlockByNumber<const full extends boolean = false>(
-    parameters: GetBlockByNumberParameters<full>,
+    parameters: EthGetBlockByNumberParameters<full>,
     options?: options,
   ): Promise<RpcBlock<full> | null> {
     return ethGetBlockByNumber(this.requester, parameters, options);
+  }
+
+  ethGetBlockByTag<const full extends boolean = false>(
+    parameters: EthGetBlockByTagParameters<full>,
+    options?: options,
+  ): Promise<RpcBlock<full> | null> {
+    return ethGetBlockByTag(this.requester, parameters, options);
   }
 
   ethGetBlockReceiptsByHash(
@@ -74,13 +86,20 @@ export class BaseClient<options extends RequestOptions> {
   }
 
   ethGetBlockReceiptsByNumber(
-    blockNumber: BlockNumberOrTag,
+    blockNumber: BlockNumber,
     options?: options,
   ): Promise<RpcTransactionReceipt[] | null> {
     return ethGetBlockReceiptsByNumber(this.requester, blockNumber, options);
   }
 
-  ethGetCode(parameters: AccountAtBlockParameters, options?: options): Promise<Hex> {
+  ethGetBlockReceiptsByTag(
+    blockTag: BlockTag,
+    options?: options,
+  ): Promise<RpcTransactionReceipt[] | null> {
+    return ethGetBlockReceiptsByTag(this.requester, blockTag, options);
+  }
+
+  ethGetCode(parameters: EthGetCodeParameters, options?: options): Promise<Hex> {
     return ethGetCode(this.requester, parameters, options);
   }
 

@@ -26,9 +26,12 @@ test("maps every HTTP action to its JSON-RPC request", async () => {
   await client.ethChainId();
   await client.ethGetBalance({ address });
   await client.ethGetBlockByHash({ blockHash: hash });
-  await client.ethGetBlockByNumber({ blockNumber: "latest", includeTransactions: true });
+  await client.ethGetBlockByNumber({ blockNumber: "0x10" });
+  await client.ethGetBlockByTag({ blockTag: "latest", includeTransactions: true });
+  await client.ethGetBlockByTag({ blockTag: "pending" });
   await client.ethGetBlockReceiptsByHash(hash);
-  await client.ethGetBlockReceiptsByNumber("safe");
+  await client.ethGetBlockReceiptsByNumber("0x10");
+  await client.ethGetBlockReceiptsByTag("safe");
   await client.ethGetCode({ address, block: "0x10" });
   await client.ethGetCode({ address });
   await client.ethGetLogsByHash({ blockHash: hash });
@@ -37,9 +40,11 @@ test("maps every HTTP action to its JSON-RPC request", async () => {
   await client.ethGetTransactionReceipt(hash);
   await client.netVersion();
   await client.debugTraceBlockByHash(hash);
-  await client.debugTraceBlockByNumber("finalized", { tracer: "callTracer", timeout: "5s" });
+  await client.debugTraceBlockByNumber("0x10");
+  await client.debugTraceBlockByTag("finalized", { tracer: "callTracer", timeout: "5s" });
   await client.traceBlockByHash(hash);
-  await client.traceBlockByNumber("earliest");
+  await client.traceBlockByNumber("0x10");
+  await client.traceBlockByTag("earliest");
   await client.traceFilter({ count: 10, fromAddress: [address], fromBlock: "0x1" });
 
   expect(requests).toEqual([
@@ -47,8 +52,11 @@ test("maps every HTTP action to its JSON-RPC request", async () => {
     { method: "eth_chainId" },
     { method: "eth_getBalance", params: [address, "latest"] },
     { method: "eth_getBlockByHash", params: [hash, false] },
+    { method: "eth_getBlockByNumber", params: ["0x10", false] },
     { method: "eth_getBlockByNumber", params: ["latest", true] },
+    { method: "eth_getBlockByNumber", params: ["pending", false] },
     { method: "eth_getBlockReceipts", params: [hash] },
+    { method: "eth_getBlockReceipts", params: ["0x10"] },
     { method: "eth_getBlockReceipts", params: ["safe"] },
     { method: "eth_getCode", params: [address, "0x10"] },
     { method: "eth_getCode", params: [address, "latest"] },
@@ -58,11 +66,13 @@ test("maps every HTTP action to its JSON-RPC request", async () => {
     { method: "eth_getTransactionReceipt", params: [hash] },
     { method: "net_version" },
     { method: "debug_traceBlockByHash", params: [hash, { tracer: "callTracer" }] },
+    { method: "debug_traceBlockByNumber", params: ["0x10", { tracer: "callTracer" }] },
     {
       method: "debug_traceBlockByNumber",
       params: ["finalized", { timeout: "5s", tracer: "callTracer" }],
     },
     { method: "trace_block", params: [hash] },
+    { method: "trace_block", params: ["0x10"] },
     { method: "trace_block", params: ["earliest"] },
     {
       method: "trace_filter",
@@ -73,8 +83,11 @@ test("maps every HTTP action to its JSON-RPC request", async () => {
 
 test("infers block transaction shape from includeTransactions", () => {
   const client = createHttpClient({ url: "https://rpc.example.com" });
-  const hashes = client.ethGetBlockByNumber({ blockNumber: "latest" });
-  const transactions = client.ethGetBlockByHash({ blockHash: hash, includeTransactions: true });
+  const hashes = client.ethGetBlockByNumber({ blockNumber: "0x10" });
+  const transactions = client.ethGetBlockByTag({
+    blockTag: "latest",
+    includeTransactions: true,
+  });
 
   expectTypeOf(hashes).resolves.toMatchTypeOf<{ transactions: `0x${string}`[] } | null>();
   expectTypeOf(transactions).resolves.toMatchTypeOf<{ transactions: RpcTransaction[] } | null>();
