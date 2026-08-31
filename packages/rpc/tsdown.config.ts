@@ -3,11 +3,6 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
   entry: ["src/index.ts"],
   clean: true,
-  deps: {
-    alwaysBundle: ["@purevm/transports"],
-    dts: { alwaysBundle: ["@purevm/transports"] },
-    onlyImport: [],
-  },
   dts: true,
   fixedExtension: true,
   format: "esm",
