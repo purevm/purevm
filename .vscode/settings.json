@@ -1,4 +1,6 @@
 {
+    "biome.enabled": false,
+    "biome.suggestInstallingGlobally": false,
     "json.schemaDownload.enable": true,
     "editor.defaultFormatter": "oxc.oxc-vscode",
     "editor.formatOnSave": true,
