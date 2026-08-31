@@ -12,6 +12,7 @@
         "node": true
     },
     "ignorePatterns": [
+        "modules/**",
         "**/dist/**",
         "**/coverage/**",
         "**/.cache/**",
