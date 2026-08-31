@@ -1,383 +1,135 @@
-# Viem Agent Guidelines
+# Agent Guidelines
 
-This document contains guidelines for AI agents working on the Viem codebase.
+Guidelines for AI agents working on this codebase. Adapt the bracketed
+placeholders to your project; keep the structure.
 
 ## Friction Logging
 
-- Log papercuts and friction (tooling, docs, APIs, tests, conventions) as you hit them with `pnpx frog log`.
-- Do not add global, system, or internal friction.
-- Run `pnpx frog list` first to see what is already known.
+- Log friction (tooling, docs, APIs, tests, conventions) as you hit it, via
+  [your friction-log tool/process — e.g. an issue template, a `friction.md`,
+  a `log-friction` script].
+- Check what's already logged before adding a duplicate.
+- Log project-specific friction only — not global/system/environment issues
+  outside this codebase's control.
 
-## Documentation (Site)
+## Documentation
 
-Guidelines for authoring docs and guides under `site/pages/`.
+Rules for authoring docs/guides under [docs directory].
 
 ### Prose
 
-- **Do not use em dashes (`—`) in docs.** Rewrite with a colon, comma, parentheses, or separate
-  sentences instead.
+- [State your house style explicitly and unambiguously — e.g. "no em
+  dashes; use a colon, comma, or separate sentences instead." Vague style
+  guidance ("write clearly") doesn't give an agent anything to check
+  against — pick concrete, checkable rules.]
 
 ### Headings
 
-- **Use Title Case for all headings.** Capitalize the first and last word and all major words
-  (nouns, verbs, adjectives, adverbs, pronouns). Keep minor words lowercase unless they are the
-  first or last word: articles (`a`, `an`, `the`), short coordinating conjunctions
-  (`and`, `but`, `or`, `nor`, `for`, `so`, `yet`), and short prepositions (`in`, `on`, `to`,
-  `of`, `for`, `with`, `as`, etc.).
-- Examples: `Send a Transaction`, `Pay Fees with Stablecoins`, `Set a Default Fee Token`,
-  `See More`.
-- Code identifiers inside a heading keep their original casing (e.g. `### Prefer Sync Actions`,
-  but `## sendTransactionSync` when the heading *is* the identifier).
+- [State your casing rule with the exact exception list, not just "use
+  title case." e.g.: capitalize first/last word and all major words; keep
+  articles, short conjunctions, and short prepositions lowercase unless
+  first or last.]
+- Code identifiers inside a heading keep their original casing.
 
 ### Links
 
-- Link out to every action (and other API) referenced in prose, on first mention. Tempo Actions
-  link to `/tempo/actions/<namespace>.<action>`; core Viem actions link to their `/docs/...` page.
+- Link out to every API/function referenced in prose, on first mention.
 
-### Guides
+### Guide Structure
 
-- A guide's main body is a **`## Recipes`** section: independent, self-contained tasks, each a
-  `###` subheading with no enforced order. Do not use step-by-step "Walkthrough" sections.
-- Do **not** repeat client setup as its own recipe. Open the Recipes section with a prerequisite
-  line linking to Getting Started, e.g. "These recipes assume you have
-  [set up a Tempo client](/tempo)." Code examples still include a `viem.config.ts` tab via
-  `[!include ~/snippets/tempo/viem.config.ts:setup]`.
-- **Always show imports in code examples.** Do not use the twoslash `// ---cut---` directive to hide
-  import statements. Each `example.ts` block starts with its imports (including
-  `import { client } from './viem.config'`), then a blank line, then the example body.
-- Guide section order: `## Overview` → `## Recipes` → `## Best Practices` → `## See More`.
+- Fix a standard section order (e.g. `Overview → Recipes/Steps → Best
+Practices → See More`) and don't deviate per-guide.
+- Don't repeat setup/prerequisites in every guide — link to a single
+  canonical setup doc instead.
+- Code examples always show their imports in full. Don't hide boilerplate
+  with a "cut" directive — an agent (or reader) copying the example should
+  get working code.
 
-## Tempo Code Generation
+## Generating Repetitive/Structured Code
 
-When generating actions (in `src/tempo/actions/`), follow these guidelines.
-
-An example of a generated action set can be found in `src/tempo/actions/token.ts`.
+When generating code that follows a repeated shape (API clients, generated
+bindings, CRUD handlers, action/command sets, etc.), follow this section.
 
 ### Source of Truth
 
-- **All actions must be based on precompile contract specifications** in `test/tempo/docs/specs/`.
-- It could be likely that some interfaces may be inconsistent between the specs (`test/tempo/docs/specs`) and the precompiles (`test/tempo/crates/contracts/src/precompiles`). Always prefer the precompile interfaces over the specs.
-- If the specification is unclear or missing details, **prompt the developer** for guidance rather than making assumptions
+- State explicitly which artifact is authoritative when generating code
+  from a spec — e.g. "prefer the actual interface/schema/contract over
+  hand-written docs when they disagree."
+- **If the source of truth is ambiguous, missing, or contradictory: stop
+  and ask.** Do not guess at the intended shape or fill gaps with
+  assumptions — a wrong guess baked into generated code is worse than a
+  short delay.
 
-### Documentation Requirements
+### Point to a Canonical Example
 
-All actions **must include comprehensive JSDoc** with:
+- Name one real, up-to-date file in the codebase as the reference example
+  for this pattern (e.g. `[path/to/canonical-example.ts]`). An agent
+  pattern-matching against real code beats an agent following abstract
+  prose rules — keep this pointer current as the codebase evolves.
 
-1. **Function description** - What the action does
-2. **`@example` block** - Complete working example showing:
-   - Required imports (`createClient`, `http`, action imports)
-   - Client setup with chain and transport
-   - Action usage with realistic parameters
-   - Expected return value handling (if applicable)
-3. **`@param` tags** - For each parameter (client, parameters)
-4. **`@returns` tag** - Description of the return value
+### Required Documentation Per Generated Unit
 
-Example:
-```typescript
-/**
- * Gets the pool ID for a token pair.
- *
- * @example
- * ```ts
- * import { createClient, http } from 'viem'
- * import { tempo } from 'viem/chains'
- * import { Actions } from 'viem/tempo'
- *
- * const client = createClient({
- *   chain: tempo.extend({ feeToken: '0x20c0000000000000000000000000000000000001' })
- *   transport: http(),
- * })
- *
- * const poolId = await Actions.amm.getPoolId(client, {
- *   userToken: '0x...',
- *   validatorToken: '0x...',
- * })
- * ```
- *
- * @param client - Client.
- * @param parameters - Parameters.
- * @returns The pool ID.
- */
-```
+Each generated function/module should include:
 
-### Action Types
+1. A one-line description of what it does.
+2. A worked example with full imports and realistic inputs (not
+   `foo`/`bar` placeholders).
+3. Parameter and return-value documentation.
 
-#### Read-Only Actions
+### Variant Patterns
 
-For view/pure functions that only read state:
+If a generated construct has known variants (e.g. sync vs. async, read vs.
+write, dry-run vs. execute), name the convention for distinguishing them
+(a suffix, a flag, separate exports) and apply it consistently — don't let
+each generated unit invent its own scheme.
 
-- Use `readContract` from `viem/actions`
-- Return type should use `ReadContractReturnType`
-- Parameters extend `ReadParameters`
+### Required Structural Elements
 
-#### Mutate-Based Actions
-
-For state-changing functions, **both variants must be implemented**:
-
-**1. Standard Async Variant**
-
-- Uses `writeContract` from `viem/actions`
-- Returns transaction hash
-- Async operation that doesn't wait for confirmation
-
-```typescript
-export async function myAction<
-  chain extends Chain | undefined,
-  account extends Account | undefined,
->(
-  client: Client<Transport, chain, account>,
-  parameters: myAction.Parameters<chain, account>,
-): Promise<myAction.ReturnValue> {
-  return myAction.inner(writeContract, client, parameters)
-}
-```
-
-**2. Sync Variant (`*Sync`)**
-
-- Named with `Sync` suffix (e.g., `mintSync`, `burnSync`, `rebalanceSwapSync`)
-- Uses `writeContractSync` from `viem/actions`
-- **Waits for transaction confirmation**
-- Returns both the receipt and extracted event data
-- **Must use `extractEvent` to get return values** (not `simulateContract`)
-
-```typescript
-export async function myActionSync<
-  chain extends Chain | undefined,
-  account extends Account | undefined,
->(
-  client: Client<Transport, chain, account>,
-  parameters: myActionSync.Parameters<chain, account>,
-): Promise<myActionSync.ReturnValue> {
-  const { throwOnReceiptRevert = true, ...rest } = parameters
-  const receipt = await myAction.inner(writeContractSync, client, {
-    ...rest,
-    throwOnReceiptRevert,
-  } as never)
-  const { args } = myAction.extractEvent(receipt.logs)
-  return {
-    ...args,
-    receipt,
-  } as never
-}
-```
-
-### Namespace Properties
-
-All actions **must include** the following components within their namespace:
-
-#### 1. `Parameters` Type
-
-```typescript
-// Read actions
-export type Parameters = ReadParameters & Args 
-
-// Write actions
-export type Parameters<
-  chain extends Chain | undefined = Chain | undefined,
-  account extends Account | undefined = Account | undefined,
-> = WriteParameters<chain, account> & Args 
-```
-
-#### 2. `Args` Type
-
-Arguments must be documented with JSDoc.
-
-```typescript
-export type Args = {
-  /** JSDoc for each argument */
-  argName: Type
-}
-```
-
-#### 3. `ReturnValue` Type
-
-```typescript
-// Read actions
-export type ReturnValue = ReadContractReturnType<typeof Abis.myAbi, 'functionName', never>
-
-// Write actions
-export type ReturnValue = WriteContractReturnType
-```
-
-#### 4. `ErrorType` Type (for write actions)
-
-Write actions must include an `ErrorType` export. Use `BaseErrorType` from `viem` as a placeholder with a TODO comment for future exhaustive error typing:
-
-```typescript
-// TODO: exhaustive error type
-export type ErrorType = BaseErrorType
-```
-
-#### 5. `call` Function
-
-**Required for all actions** - enables composition with other viem actions:
-
-```typescript
-/**
- * Defines a call to the `functionName` function.
- *
- * Can be passed as a parameter to:
- * - [`estimateContractGas`](https://viem.sh/docs/contract/estimateContractGas): estimate the gas cost of the call
- * - [`simulateContract`](https://viem.sh/docs/contract/simulateContract): simulate the call
- * - [`sendCalls`](https://viem.sh/docs/actions/wallet/sendCalls): send multiple calls
- *
- * @example
- * ```ts
- * import { createClient, http, walletActions } from 'viem'
- * import { tempo } from 'viem/chains'
- * import { Actions } from 'viem/tempo'
- *
- * const client = createClient({
- *   chain: tempo.extend({ feeToken: '0x20c0000000000000000000000000000000000001' })
- *   transport: http(),
- * }).extend(walletActions)
- *
- * const hash = await client.sendTransaction({
- *   calls: [actions.amm.myAction.call({ arg1, arg2 })],
- * })
- * ```
- *
- * @param args - Arguments.
- * @returns The call.
- */
-export function call(args: Args) {
-  return defineCall({
-    address: Addresses.contractName,
-    abi: Abis.contractName,
-    args: [/* transformed args */],
-    functionName: 'functionName',
-  })
-}
-```
-
-The `call` function enables these use cases:
-- `sendCalls` - Batch multiple calls in one transaction
-- `sendTransaction` with `calls` - Send transaction with multiple operations
-- `multicall` - Execute multiple calls in parallel
-- `estimateContractGas` - Estimate gas costs
-- `simulateContract` - Simulate execution
-
-#### 6. `extractEvent` Function (for mutate-based actions)
-
-**Required for all actions that emit events**:
-
-```typescript
-/**
- * Extracts the `EventName` event from logs.
- *
- * @param logs - The logs.
- * @returns The `EventName` event.
- */
-export function extractEvent(logs: Log[]) {
-  const [log] = parseEventLogs({
-    abi: Abis.contractName,
-    logs,
-    eventName: 'EventName',
-    strict: true,
-  })
-  if (!log) throw new Error('`EventName` event not found.')
-  return log
-}
-```
-
-#### 7. `inner` Function (for write actions)
-
-```typescript
-/** @internal */
-export async function inner<
-  action extends typeof writeContract | typeof writeContractSync,
-  chain extends Chain | undefined,
-  account extends Account | undefined,
->(
-  action: action,
-  client: Client<Transport, chain, account>,
-  parameters: Parameters<chain, account>,
-): Promise<ReturnType<action>> {
-  const { arg1, arg2, ...rest } = parameters
-  const call = myAction.call({ arg1, arg2 })
-  return (await action(client, {
-    ...rest,
-    ...call,
-  } as never)) as never
-}
-```
-
-### Namespace Structure
-
-Organize actions using namespace pattern:
-
-```typescript
-export async function myAction(...) { ... }
-
-export namespace myAction {
-  export type Parameters = ...
-  export type Args = ...
-  export type ReturnValue = ...
-  
-  export async function inner(...) { ... }  // for write actions
-  export function call(args: Args) { ... }
-  export function extractEvent(logs: Log[]) { ... }  // for mutate actions
-}
-```
+List the fixed set of exports/fields every generated unit must have (types,
+error type, a composable "call" or "spec" primitive, event/result
+extractors, etc.), and **why each one is required** — not just that it's
+required. If an element is a template default with no real behavior yet
+(e.g. a placeholder error type), say so explicitly and note it's
+intentional, not an oversight — don't leave a silent TODO baked into every
+generated file with no owner or plan to resolve it.
 
 ### Decision-Making
 
-When encountering situations that require judgment:
+When judgment is needed and the answer isn't in this doc or the source of
+truth:
 
-- **Specification ambiguities**: Prompt developer for clarification
-- **Missing contract details**: Request ABI or specification update
-- **Event structure uncertainty**: Ask for event definition
-- **Parameter transformations**: Confirm expected input/output formats
-- **Edge cases**: Discuss handling strategy with developer
+- Spec/contract ambiguity → ask, don't assume.
+- Missing details → request the missing artifact rather than fabricating one.
+- Uncertain edge-case handling → propose the options and ask which to use.
 
-### Naming Conventions
+## Testing
 
-- Action names should match contract function names (in camelCase)
-- Sync variants use `Sync` suffix (e.g., `myActionSync`)
-- Event names in `extractEvent` should match contract event names exactly
-- Namespace components should be exported within the action's namespace
+- **Unit tests**: pure logic, no I/O — colocated next to the code under
+  test (either as a sibling file or a `__tests__/` folder next to the
+  component — pick one convention and apply it everywhere).
+- **Integration tests**: real external dependencies (DB, queue, RPC, other
+  services), no UI — colocated the same way as unit tests, distinguished
+  by filename suffix, not by a separate folder.
+- **E2E tests**: exercises the full running system from the outside
+  (browser, HTTP, CLI) — not colocated, since it isn't "about" one
+  component. Lives in a single top-level test directory with its own
+  runner/config.
+- File-extension convention: pick one suffix per tier (e.g. `.test.ts` for
+  unit/integration, `.spec.ts` for e2e) so the extension alone tells you
+  which runner owns a file.
+- Point to one real, comprehensive test file as the canonical pattern for
+  test structure (naming `describe` blocks, a default/happy-path case,
+  named behavior/edge-case tests, error-condition tests) rather than
+  re-describing the pattern in prose every time.
+- Note any non-obvious test-infrastructure gotchas explicitly, with the
+  _why_ (race conditions on startup, required command ordering, env flags
+  that must be set) — these are exactly the details an agent can't infer
+  from reading the code.
 
-### Testing
+## Naming Conventions
 
-Tests should be co-located with actions in `*action-name*.test.ts` files. Reference contract tests in `test/tempo/crates/precompiles/` for expected behavior. 
-
-- Run `pnpm check:types` and `pnpm build:types` sequentially, never concurrently. `build:types`
-  writes the ignored `src/_types` tree and must start with that directory absent to avoid TypeScript
-  reading generated declarations as inputs. Remove `src/_types` again before `check:types`.
-- Local Tempo tests intentionally run against `VITE_TEMPO_TAG=latest`. Before submitting fixture
-  transactions with expiring nonces, wait until `getBlock` returns a nonzero timestamp; the node's
-  startup signal can arrive before the first canonical block is available through RPC.
-
-See `src/tempo/actions/token.test.ts` for a comprehensive example of test patterns and structure.
-
-#### Test Structure
-
-Organize tests by action name with a default test case and behavior-specific tests:
-
-```typescript
-describe('actionName', () => {
-  test('default', async () => {
-    // Test the primary/happy path scenario
-    const { receipt, ...result } = await Actions.namespace.actionSync(client, {
-      param1: value1,
-      param2: value2,
-    })
-    
-    expect(receipt).toBeDefined()
-    expect(result).toMatchInlineSnapshot(`...`)
-  })
-
-  test('behavior: specific edge case', async () => {
-    // Test specific behaviors, edge cases, or variations
-  })
-
-  test('behavior: error conditions', async () => {
-    // Test error handling
-    await expect(
-      actions.namespace.actionSync(client, { ... })
-    ).rejects.toThrow()
-  })
-})
-
-describe.todo('unimplementedAction')
-```
+- Generated/derived names should match their source (contract function,
+  schema field, etc.) under a fixed casing rule — don't leave casing to
+  agent discretion.
+- Fix the suffix/prefix convention for variants (e.g. `Sync`, `Async`,
+  `V2`) once, in this doc, rather than letting it drift per module.
