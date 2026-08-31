@@ -5,6 +5,7 @@
         "**/coverage/**",
         "**/.cache/**",
         "**/generated.ts",
+        "packages/__backup__/**",
         "**/vectors/**/*.json",
         "**/test/kzg/**/*.json",
         "**/test/kzg/**/*.txt"
