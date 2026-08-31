@@ -4,8 +4,8 @@ Monorepo for the `@purevm` npm scope.
 
 ## Packages
 
-| Package | Path | Description |
-| --- | --- | --- |
+| Package                         | Path           | Description                                              |
+| ------------------------------- | -------------- | -------------------------------------------------------- |
 | [`@purevm/rpc`](./packages/rpc) | `packages/rpc` | HTTP and WebSocket RPC toolkit for EVM-compatible chains |
 
 Install packages independently:
