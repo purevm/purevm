@@ -62,9 +62,11 @@
         "typecheck": "tsc --noEmit",
         "validate": "pnpm check && pnpm test && pnpm build"
     },
+    "dependencies": {
+        "@purevm/transports": "workspace:*"
+    },
     "devDependencies": {
         "@arethetypeswrong/core": "^0.18.5",
-        "@purevm/transports": "workspace:*",
         "@types/node": "^26.4.0",
         "@vitest/coverage-v8": "^4.1.11",
         "publint": "^0.3.24",
