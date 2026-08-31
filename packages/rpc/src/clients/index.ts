@@ -1,14 +1,9 @@
+export { BaseClient } from "./base-client.js";
+export { createHttpClient, HttpClient } from "./http-client.js";
 export {
-    HttpClient,
-} from "./http/client.js";
-export {
-    RpcAbortError,
-    RpcHttpStatusError,
-    RpcIdMismatchError,
-    RpcInvalidResponseError,
-    RpcNetworkError,
-    RpcParseBodyError,
-    RpcProviderError,
-    RpcSerializationError,
-    RpcTimeoutError,
-} from "./http/errors/index.js";
+  createWebSocketClient,
+  WebSocketClient,
+  type LogsSubscriptionOptions,
+  type PendingTransactionsSubscriptionOptions,
+  type SubscriptionHandlers,
+} from "./websocket-client.js";
