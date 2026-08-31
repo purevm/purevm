@@ -27,5 +27,5 @@ pnpm validate
 ```
 
 Formatting and linting are configured once at the root (`.oxfmtrc.json`, `.oxlintrc.json`) and run
-across every package. Build and test options are shared through `tsdown.base.ts` and
-`vitest.base.ts`; each package overrides only its entry point and coverage globs.
+across every package. Everything else is package-scoped: each package owns its own dependencies,
+`engines`, `tsdown.config.ts`, and `vitest.config.ts`.
