@@ -1,7 +1,8 @@
 {
     "name": "purevm",
-    "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM blockchains.",
     "private": true,
+    "type": "module",
+    "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM blockchains.",
     "scripts": {
         "build": "pnpm -r --if-present build",
         "test": "pnpm -r --if-present test",
@@ -15,13 +16,8 @@
         "validate": "pnpm typecheck && pnpm check"
     },
     "devDependencies": {
-        "@types/node": "^26.4.0",
         "oxfmt": "^0.65.0",
-        "oxlint": "^1.80.0",
-        "typescript": "^7.0.2"
-    },
-    "engines": {
-        "node": ">=24"
+        "oxlint": "^1.80.0"
     },
     "packageManager": "pnpm@10.34.5",
     "pnpm": {

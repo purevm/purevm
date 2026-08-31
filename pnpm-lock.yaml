@@ -8,27 +8,22 @@ importers:
 
   .:
     devDependencies:
-      '@types/node':
-        specifier: ^26.4.0
-        version: 26.4.0
       oxfmt:
         specifier: ^0.65.0
         version: 0.65.0
       oxlint:
         specifier: ^1.80.0
         version: 1.80.0
-      typescript:
-        specifier: ^7.0.2
-        version: 7.0.2
 
   packages/rpc:
+    dependencies:
+      '@purevm/transports':
+        specifier: workspace:*
+        version: link:../transports
     devDependencies:
       '@arethetypeswrong/core':
         specifier: ^0.18.5
         version: 0.18.5
-      '@purevm/transports':
-        specifier: workspace:*
-        version: link:../transports
       '@types/node':
         specifier: ^26.4.0
         version: 26.4.0
