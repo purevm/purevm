@@ -11,7 +11,6 @@ export default defineConfig({
   outDir: "dist",
   platform: "neutral",
   publint: true,
-  attw: { level: "error", profile: "esm-only" },
   report: { brotli: true, gzip: true },
   sourcemap: true,
   target: "es2022",
