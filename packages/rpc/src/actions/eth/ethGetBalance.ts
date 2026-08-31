@@ -4,7 +4,9 @@ import type { Address, BlockNumberOrTag, Quantity } from "../../types/primitives
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 
 export type EthGetBalanceParameters = {
+  /** Account whose balance should be read. */
   address: Address;
+  /** State block, defaulting to `latest`. */
   block?: BlockNumberOrTag;
 };
 

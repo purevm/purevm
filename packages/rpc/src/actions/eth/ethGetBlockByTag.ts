@@ -5,7 +5,9 @@ import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 import type { RpcBlock } from "./types.js";
 
 export type EthGetBlockByTagParameters<full extends boolean = false> = {
+  /** Named execution-state position of the block to retrieve. */
   blockTag: BlockTag;
+  /** Return full transactions when true, otherwise transaction hashes. */
   includeTransactions?: full;
 };
 

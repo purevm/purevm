@@ -5,7 +5,9 @@ import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 import type { RpcBlock } from "./types.js";
 
 export type EthGetBlockByHashParameters<full extends boolean = false> = {
+  /** Hash of the block to retrieve. */
   blockHash: BlockHash;
+  /** Return full transactions when true, otherwise transaction hashes. */
   includeTransactions?: full;
 };
 

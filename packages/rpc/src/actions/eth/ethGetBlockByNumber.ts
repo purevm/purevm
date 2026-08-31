@@ -5,7 +5,9 @@ import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 import type { RpcBlock } from "./types.js";
 
 export type EthGetBlockByNumberParameters<full extends boolean = false> = {
+  /** Hex-encoded number of the block to retrieve. */
   blockNumber: BlockNumber;
+  /** Return full transactions when true, otherwise transaction hashes. */
   includeTransactions?: full;
 };
 

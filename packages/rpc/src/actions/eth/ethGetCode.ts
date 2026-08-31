@@ -4,7 +4,9 @@ import type { Address, BlockNumberOrTag, Hex } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 
 export type EthGetCodeParameters = {
+  /** Account whose deployed bytecode should be read. */
   address: Address;
+  /** State block, defaulting to `latest`. */
   block?: BlockNumberOrTag;
 };
 
