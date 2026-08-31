@@ -1,15 +1,15 @@
 {
-    "name": "@purevm/rpc",
+    "name": "@purevm/transports",
     "version": "0.1.0",
-    "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM-compatible blockchains over HTTP and WebSocket APIs.",
-    "type": "module",
+    "description": "Small JSON-RPC transports for HTTP and WebSocket.",
     "files": [
         "dist"
     ],
+    "type": "module",
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
+            "types": "./dist/index.d.mts",
+            "import": "./dist/index.mjs"
         }
     },
     "publishConfig": {
@@ -17,12 +17,18 @@
     },
     "scripts": {
         "build": "tsdown",
-        "test": "vitest run tests/*.test.ts",
-        "typecheck": "tsc --noEmit"
+        "check": "pnpm lint && pnpm format:check",
+        "check:fix": "pnpm format && pnpm lint:fix",
+        "format": "oxfmt .",
+        "format:check": "oxfmt --check .",
+        "lint": "oxlint --deny-warnings .",
+        "lint:fix": "oxlint --fix --deny-warnings .",
+        "test": "vitest run",
+        "typecheck": "tsc --noEmit",
+        "validate": "pnpm typecheck && pnpm check"
     },
     "devDependencies": {
         "@types/node": "^26.0.1",
-        "dotenv": "^17.4.2",
         "tsdown": "^0.22.3",
         "typescript": "^7.0.2",
         "vitest": "^4.1.10"

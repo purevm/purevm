@@ -44,9 +44,6 @@ importers:
       '@types/node':
         specifier: ^26.0.1
         version: 26.2.0
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
       tsdown:
         specifier: ^0.22.3
         version: 0.22.14(typescript@7.0.2)
