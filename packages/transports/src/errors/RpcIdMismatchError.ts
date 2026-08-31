@@ -10,6 +10,7 @@ export class RpcIdMismatchError extends RpcInvalidResponseError {
       response,
       cause,
       `JSON-RPC response id mismatch: expected ${String(expectedId)}, got ${String(responseId)}.`,
+      "RPC_ID_MISMATCH",
     );
     this.expectedId = expectedId;
     this.responseId = responseId;

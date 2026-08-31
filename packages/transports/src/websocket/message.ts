@@ -1,5 +1,5 @@
 import { isRecord, isRpcId } from "../common/rpc.js";
-import { RpcResponseError } from "../errors/index.js";
+import { WebSocketProtocolError } from "../errors/index.js";
 import type { RpcId } from "../types.js";
 
 export type RpcMessage =
@@ -12,7 +12,7 @@ export function parseWebSocketMessage(data: unknown): RpcMessage {
   try {
     message = JSON.parse(text);
   } catch (cause) {
-    throw new RpcResponseError("WebSocket message is not valid JSON.", text, cause);
+    throw new WebSocketProtocolError("WebSocket message is not valid JSON.", text, text, cause);
   }
 
   if (isSubscriptionMessage(message)) {
@@ -23,7 +23,7 @@ export function parseWebSocketMessage(data: unknown): RpcMessage {
     };
   }
   if (!isRecord(message) || !isRpcId(message["id"])) {
-    throw new RpcResponseError("Invalid JSON-RPC WebSocket message.", message);
+    throw new WebSocketProtocolError("Invalid JSON-RPC WebSocket message.", message, text);
   }
   return { type: "response", id: message["id"], response: message };
 }
@@ -48,5 +48,5 @@ function messageText(data: unknown): string {
     const bytes = new Uint8Array(data.buffer as ArrayBuffer, data.byteOffset, data.byteLength);
     return new TextDecoder().decode(bytes);
   }
-  throw new RpcResponseError("Unsupported WebSocket message type.", data);
+  throw new WebSocketProtocolError("Unsupported WebSocket message type.", data);
 }

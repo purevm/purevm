@@ -2,7 +2,7 @@ import { resolveTimeout } from "../common/options.js";
 import { createRequestIdGenerator } from "../common/request-id.js";
 import { resolveRetry, withRetry } from "../common/retry.js";
 import { parseRpcResponse } from "../common/rpc.js";
-import { RpcSerializationError, WebSocketClosedError } from "../errors/index.js";
+import { RpcSerializationError, WebSocketStoppedError } from "../errors/index.js";
 import type {
   JsonValue,
   RequestOptions,
@@ -72,7 +72,7 @@ export class WebSocketTransport implements Transport {
   }
 
   async connect(options: RequestOptions = {}): Promise<void> {
-    if (this.stopped) throw new WebSocketClosedError();
+    if (this.stopped) throw new WebSocketStoppedError();
     const timeoutMs = resolveTimeout(this.options, options);
     await this.connection.connect(timeoutMs, options.signal);
   }
@@ -81,7 +81,7 @@ export class WebSocketTransport implements Transport {
     call: RpcCall<method>,
     options: RequestOptions = {},
   ): Promise<method["result"]> {
-    if (this.stopped) throw new WebSocketClosedError();
+    if (this.stopped) throw new WebSocketStoppedError();
     const timeoutMs = resolveTimeout(this.options, options);
     const retry = resolveRetry(this.options, options);
     return withRetry(
@@ -101,7 +101,7 @@ export class WebSocketTransport implements Transport {
   close(): void {
     if (this.stopped) return;
     this.stopped = true;
-    this.pending.rejectAll(new WebSocketClosedError());
+    this.pending.rejectAll(new WebSocketStoppedError());
     this.subscriber.disconnected();
     this.connection.close();
   }
