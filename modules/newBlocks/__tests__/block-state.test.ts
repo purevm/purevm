@@ -90,6 +90,9 @@ describe("BlockState", () => {
     const block = header(1, "a", "0");
     state.update(block, "http");
     state.clear();
-    expect(state.update(block, "http")).toMatchObject({ event: { previous: undefined } });
+    expect(state.update(block, "http")).toEqual({
+      event: { block, source: "http", type: "block" },
+      status: "accepted",
+    });
   });
 });
