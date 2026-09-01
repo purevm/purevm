@@ -56,7 +56,9 @@ test("keeps HTTP-only methods off the WebSocket client", () => {
   });
 
   expectTypeOf(client).not.toHaveProperty("debugTraceBlockByHash");
+  expectTypeOf(client).not.toHaveProperty("debugTraceTransaction");
   expectTypeOf(client).not.toHaveProperty("traceFilter");
+  expectTypeOf(client).not.toHaveProperty("traceTransaction");
   expectTypeOf<Parameters<typeof client.ethSubscribeNewPendingTransactions<true>>[0]["onData"]>()
     .parameter(0)
     .toEqualTypeOf<RpcTransaction>();

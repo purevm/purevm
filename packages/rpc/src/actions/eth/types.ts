@@ -1,12 +1,43 @@
 import type {
   Address,
   BlockHash,
+  BlockNumber,
   BlockNumberOrTag,
   Hash,
   Hex,
   Index,
   Quantity,
 } from "../../types/primitives.js";
+
+/** Transaction-like input accepted by read-only call and gas simulation methods. */
+export type RpcCallRequest = {
+  /** EIP-2930 access list to warm before execution. */
+  accessList?: AccessList;
+  /** Versioned blob hashes used by an EIP-4844 call. */
+  blobVersionedHashes?: readonly Hash[];
+  /** Calldata. `input` is preferred when both fields are supported by a provider. */
+  data?: Hex;
+  /** Sender used for state and balance checks. */
+  from?: Address;
+  /** Gas limit available to the simulated call. */
+  gas?: Quantity;
+  /** Legacy gas price. */
+  gasPrice?: Quantity;
+  /** Calldata using the modern transaction field name. */
+  input?: Hex;
+  /** Maximum fee per blob gas. */
+  maxFeePerBlobGas?: Quantity;
+  /** Maximum total fee per gas. */
+  maxFeePerGas?: Quantity;
+  /** Maximum priority fee per gas. */
+  maxPriorityFeePerGas?: Quantity;
+  /** Transaction nonce used by clients that support it for simulation. */
+  nonce?: Quantity;
+  /** Recipient, or null to simulate contract creation. */
+  to?: Address | null;
+  /** Wei transferred by the simulated call. */
+  value?: Quantity;
+};
 
 export type AccessList = readonly {
   /** Account whose storage may be accessed by the transaction. */
@@ -277,6 +308,54 @@ export type RpcTransactionReceipt = {
   transactionIndex: Index;
   /** Transaction envelope type identifier. */
   type: RpcTransactionType;
+};
+
+export type RpcAccessListResult = {
+  /** Access list generated for the simulated transaction. */
+  accessList: AccessList;
+  /** Error encountered while constructing the access list, when any. */
+  error?: string;
+  /** Estimated gas consumed with the generated access list. */
+  gasUsed: Quantity;
+};
+
+export type RpcFeeHistory = {
+  /** Base fee per blob gas, including the next block when supported. */
+  baseFeePerBlobGas?: Quantity[];
+  /** Base fee per gas, including the next block. */
+  baseFeePerGas: Quantity[];
+  /** Blob gas utilization ratios for returned blocks. */
+  blobGasUsedRatio?: number[];
+  /** Gas utilization ratios for returned blocks. */
+  gasUsedRatio: number[];
+  /** Number of the oldest returned block. */
+  oldestBlock: BlockNumber;
+  /** Priority-fee samples for each requested percentile. */
+  reward?: Quantity[][];
+};
+
+export type RpcStorageProof = {
+  /** Merkle proof nodes for this storage slot. */
+  proof: Hex[];
+  /** Requested storage key. */
+  key: Hex;
+  /** Value stored at the requested key. */
+  value: Quantity;
+};
+
+export type RpcAccountProof = {
+  /** Account Merkle proof nodes. */
+  accountProof: Hex[];
+  /** Account balance in wei. */
+  balance: Quantity;
+  /** Hash of the account bytecode. */
+  codeHash: Hash;
+  /** Account nonce. */
+  nonce: Quantity;
+  /** Root of the account storage trie. */
+  storageHash: Hash;
+  /** Proofs for each requested storage key. */
+  storageProof: RpcStorageProof[];
 };
 
 /** Topic selectors, including OR lists and null wildcards by position. */

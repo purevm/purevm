@@ -94,6 +94,116 @@ test("infers block transaction shape from includeTransactions", () => {
   expectTypeOf(client).not.toHaveProperty("ethSubscribeNewHeads");
 });
 
+test("maps every additional basic action to its JSON-RPC request", async () => {
+  const requests: { method: string; params?: unknown }[] = [];
+  const client = createHttpClient({
+    url: "https://rpc.example.com",
+    retry: false,
+    fetch: async (_input, init) => {
+      const request = JSON.parse(String(init?.body)) as {
+        id: number;
+        method: string;
+        params?: unknown;
+      };
+      requests.push({ method: request.method, params: request.params });
+      return Response.json({ id: request.id, jsonrpc: "2.0", result: resultFor(request.method) });
+    },
+  });
+  const call = { data: "0x", from: address, to: address } as const;
+  const traceTypes = ["trace"] as const;
+  const calls = [[call, traceTypes]] as const;
+
+  await client.ethBlobBaseFee();
+  await client.ethCall({ call });
+  await client.ethCreateAccessList({ block: "0x10", call });
+  await client.ethEstimateGas({ call });
+  await client.ethFeeHistory({ blockCount: "0x5", newestBlock: "latest" });
+  await client.ethGasPrice();
+  await client.ethGetBlockTransactionCountByHash(hash);
+  await client.ethGetBlockTransactionCountByNumber("0x10");
+  await client.ethGetBlockTransactionCountByTag("safe");
+  await client.ethGetFilterChanges<`0x${string}`>("0x1");
+  await client.ethGetFilterLogs("0x1");
+  await client.ethGetProof({ address, storageKeys: ["0x0"] });
+  await client.ethGetStorageAt({ address, position: "0x0" });
+  await client.ethGetTransactionByBlockHashAndIndex(hash, "0x0");
+  await client.ethGetTransactionByBlockNumberAndIndex("0x10", "0x0");
+  await client.ethGetTransactionByBlockTagAndIndex("latest", "0x0");
+  await client.ethGetTransactionCount({ address });
+  await client.ethGetUncleByBlockHashAndIndex(hash, "0x0");
+  await client.ethGetUncleByBlockNumberAndIndex("0x10", "0x0");
+  await client.ethGetUncleByBlockTagAndIndex("latest", "0x0");
+  await client.ethGetUncleCountByBlockHash(hash);
+  await client.ethGetUncleCountByBlockNumber("0x10");
+  await client.ethGetUncleCountByBlockTag("latest");
+  await client.ethMaxPriorityFeePerGas();
+  await client.ethNewBlockFilter();
+  await client.ethNewFilter({ address });
+  await client.ethNewPendingTransactionFilter();
+  await client.ethSyncing();
+  await client.ethUninstallFilter("0x1");
+  await client.netListening();
+  await client.netPeerCount();
+  await client.debugTraceCallByNumber(call, "0x10");
+  await client.debugTraceCallByTag(call, "latest");
+  await client.debugTraceTransaction(hash);
+  await client.traceCallByNumber(call, traceTypes, "0x10");
+  await client.traceCallByTag(call, traceTypes, "latest");
+  await client.traceCallManyByNumber(calls, "0x10");
+  await client.traceCallManyByTag(calls, "latest");
+  await client.traceGet(hash, ["0x0"]);
+  await client.traceReplayBlockTransactionsByNumber("0x10", traceTypes);
+  await client.traceReplayBlockTransactionsByTag("latest", traceTypes);
+  await client.traceReplayTransaction(hash, traceTypes);
+  await client.traceTransaction(hash);
+
+  expect(requests).toEqual([
+    { method: "eth_blobBaseFee" },
+    { method: "eth_call", params: [call, "latest"] },
+    { method: "eth_createAccessList", params: [call, "0x10"] },
+    { method: "eth_estimateGas", params: [call, "latest"] },
+    { method: "eth_feeHistory", params: ["0x5", "latest", []] },
+    { method: "eth_gasPrice" },
+    { method: "eth_getBlockTransactionCountByHash", params: [hash] },
+    { method: "eth_getBlockTransactionCountByNumber", params: ["0x10"] },
+    { method: "eth_getBlockTransactionCountByNumber", params: ["safe"] },
+    { method: "eth_getFilterChanges", params: ["0x1"] },
+    { method: "eth_getFilterLogs", params: ["0x1"] },
+    { method: "eth_getProof", params: [address, ["0x0"], "latest"] },
+    { method: "eth_getStorageAt", params: [address, "0x0", "latest"] },
+    { method: "eth_getTransactionByBlockHashAndIndex", params: [hash, "0x0"] },
+    { method: "eth_getTransactionByBlockNumberAndIndex", params: ["0x10", "0x0"] },
+    { method: "eth_getTransactionByBlockNumberAndIndex", params: ["latest", "0x0"] },
+    { method: "eth_getTransactionCount", params: [address, "latest"] },
+    { method: "eth_getUncleByBlockHashAndIndex", params: [hash, "0x0"] },
+    { method: "eth_getUncleByBlockNumberAndIndex", params: ["0x10", "0x0"] },
+    { method: "eth_getUncleByBlockNumberAndIndex", params: ["latest", "0x0"] },
+    { method: "eth_getUncleCountByBlockHash", params: [hash] },
+    { method: "eth_getUncleCountByBlockNumber", params: ["0x10"] },
+    { method: "eth_getUncleCountByBlockNumber", params: ["latest"] },
+    { method: "eth_maxPriorityFeePerGas" },
+    { method: "eth_newBlockFilter" },
+    { method: "eth_newFilter", params: [{ address }] },
+    { method: "eth_newPendingTransactionFilter" },
+    { method: "eth_syncing" },
+    { method: "eth_uninstallFilter", params: ["0x1"] },
+    { method: "net_listening" },
+    { method: "net_peerCount" },
+    { method: "debug_traceCall", params: [call, "0x10", { tracer: "callTracer" }] },
+    { method: "debug_traceCall", params: [call, "latest", { tracer: "callTracer" }] },
+    { method: "debug_traceTransaction", params: [hash, { tracer: "callTracer" }] },
+    { method: "trace_call", params: [call, traceTypes, "0x10"] },
+    { method: "trace_call", params: [call, traceTypes, "latest"] },
+    { method: "trace_callMany", params: [calls, "0x10"] },
+    { method: "trace_callMany", params: [calls, "latest"] },
+    { method: "trace_get", params: [hash, ["0x0"]] },
+    { method: "trace_replayBlockTransactions", params: ["0x10", traceTypes] },
+    { method: "trace_replayBlockTransactions", params: ["latest", traceTypes] },
+    { method: "trace_replayTransaction", params: [hash, traceTypes] },
+    { method: "trace_transaction", params: [hash] },
+  ]);
+});
+
 function resultFor(method: string): unknown {
   if (method === "eth_blockNumber" || method === "eth_chainId" || method === "eth_getBalance") {
     return "0x1";

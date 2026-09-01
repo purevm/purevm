@@ -1,4 +1,5 @@
-import type { Address, Hash, Hex, Quantity } from "../../types/primitives.js";
+import type { Address, Hash, Hex, Quantity, TransactionHash } from "../../types/primitives.js";
+import type { RpcCallRequest } from "../eth/types.js";
 
 /** Call operation represented by a parity-style trace. */
 export type TraceCallType = "call" | "callcode" | "delegatecall" | "staticcall";
@@ -130,3 +131,62 @@ export type TraceRewardEntry = TraceBlockBase & {
 
 /** Any entry returned by `trace_block` or `trace_filter`. */
 export type TraceEntry = TraceCallEntry | TraceCreateEntry | TraceRewardEntry | TraceSuicideEntry;
+
+type UnlocalizedTrace<entry> = entry extends TraceEntry
+  ? Omit<entry, "blockHash" | "blockNumber" | "transactionHash" | "transactionPosition">
+  : never;
+
+/** Trace entry returned by ad-hoc simulation and replay methods. */
+export type TraceResultEntry = UnlocalizedTrace<TraceEntry>;
+
+export type TraceType = "stateDiff" | "trace" | "vmTrace";
+
+export type TraceStateChange<value> =
+  | { "*": { from: value; to: value } }
+  | { "+": value }
+  | { "-": value }
+  | { "=": value };
+
+export type TraceAccountStateDiff = {
+  balance: TraceStateChange<Quantity>;
+  code: TraceStateChange<Hex>;
+  nonce: TraceStateChange<Quantity>;
+  storage: Record<Hex, TraceStateChange<Hex>>;
+};
+
+export type TraceStateDiff = Record<Address, TraceAccountStateDiff>;
+
+export type TraceVmExecutedOperation = {
+  mem?: { data: Hex; off: number };
+  push?: Hex[];
+  store?: { key: Hex; val: Hex };
+  used: number;
+};
+
+export type TraceVmOperation = {
+  cost: number;
+  ex?: TraceVmExecutedOperation;
+  idx: string;
+  op: string;
+  pc: number;
+  sub?: TraceVmTrace | null;
+};
+
+export type TraceVmTrace = {
+  code: Hex;
+  ops: TraceVmOperation[];
+};
+
+export type TraceReplayResult = {
+  output: Hex;
+  stateDiff: TraceStateDiff | null;
+  trace: TraceResultEntry[];
+  vmTrace: TraceVmTrace | null;
+};
+
+export type TraceReplayTransactionResult = TraceReplayResult & {
+  /** Hash of the replayed transaction in a block-wide replay response. */
+  transactionHash: TransactionHash;
+};
+
+export type TraceCallManyEntry = readonly [RpcCallRequest, readonly TraceType[]];
