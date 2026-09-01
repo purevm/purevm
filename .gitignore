@@ -7,6 +7,8 @@ node_modules/
 
 # Scratch / not part of the workspace
 modules/*
+!modules/extensions/
+!modules/extensions/**
 !modules/newHeads/
 !modules/newHeads/**
 
