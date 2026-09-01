@@ -6,7 +6,9 @@ coverage/
 node_modules/
 
 # Scratch / not part of the workspace
-modules/
+modules/*
+!modules/newHeads/
+!modules/newHeads/**
 
 # Env and logs
 .env

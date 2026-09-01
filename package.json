@@ -4,19 +4,30 @@
     "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM blockchains.",
     "scripts": {
         "build": "pnpm -r --if-present build",
-        "test": "pnpm -r --if-present test",
-        "typecheck": "pnpm -r --if-present typecheck",
-        "lint": "oxlint --deny-warnings --report-unused-disable-directives .",
+        "test": "pnpm -r --if-present test && pnpm test:new-heads",
+        "test:new-heads": "vitest run --config modules/newHeads/vitest.config.mts",
+        "test:new-heads:coverage": "vitest run --config modules/newHeads/vitest.config.mts --coverage",
+        "typecheck": "pnpm -r --if-present typecheck && pnpm typecheck:new-heads",
+        "typecheck:new-heads": "tsc --noEmit -p modules/newHeads/tsconfig.json",
+        "lint": "oxlint --deny-warnings --report-unused-disable-directives . && pnpm lint:variables",
         "lint:fix": "oxlint --fix --deny-warnings --report-unused-disable-directives .",
+        "lint:variables": "node scripts/check-untyped-variables.mjs .",
         "format": "oxfmt .",
         "format:check": "oxfmt --check .",
         "check": "pnpm lint && pnpm format:check",
         "check:fix": "pnpm format && pnpm lint:fix",
         "validate": "pnpm typecheck && pnpm check"
     },
+    "dependencies": {
+        "@purevm/rpc": "workspace:*"
+    },
     "devDependencies": {
+        "@types/node": "^26.4.0",
+        "@vitest/coverage-v8": "^4.1.11",
         "oxfmt": "^0.65.0",
-        "oxlint": "^1.80.0"
+        "oxlint": "^1.80.0",
+        "typescript": "^7.0.2",
+        "vitest": "^4.1.11"
     },
     "packageManager": "pnpm@10.34.5",
     "pnpm": {

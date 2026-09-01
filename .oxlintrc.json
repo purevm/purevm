@@ -12,7 +12,10 @@
         "node": true
     },
     "ignorePatterns": [
-        "modules/**",
+        "modules/modules/**",
+        "modules/src/**",
+        "modules/src2/**",
+        "modules/tests/**",
         "**/dist/**",
         "**/coverage/**",
         "**/.cache/**",
