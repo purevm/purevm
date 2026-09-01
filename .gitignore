@@ -11,6 +11,8 @@ modules/*
 !modules/extensions/**
 !modules/newHeads/
 !modules/newHeads/**
+!modules/newBlocks/
+!modules/newBlocks/**
 
 # Env and logs
 .env
