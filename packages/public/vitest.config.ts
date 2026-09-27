@@ -9,6 +9,7 @@ export default defineConfig({
         "src/clients/base-client.ts",
         "src/clients/http-client.ts",
         "src/clients/websocket-client.ts",
+        "src/utils/**/*.ts",
       ],
       provider: "v8",
       reporter: ["text", "json-summary", "html", "lcov"],

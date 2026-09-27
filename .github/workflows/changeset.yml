@@ -1,27 +1,25 @@
-name: Commit Message
+name: Changeset
 
 on:
-  push:
-    branches: [main]
   pull_request:
 
 permissions:
   contents: read
 
 concurrency:
-  group: commit-message-${{ github.ref }}
+  group: changeset-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Validate commit messages
+  status:
+    name: Require a changeset for package changes
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
-          persist-credentials: false
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
@@ -32,8 +30,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - if: github.event_name == 'pull_request'
-        run: pnpm commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"
-
-      - if: github.event_name == 'push'
-        run: pnpm commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}"
+      # Fails when a published package changed without a changeset. Use `pnpm changeset --empty`
+      # for changes that must not trigger a release.
+      - run: pnpm changeset status --since=origin/${{ github.base_ref }}

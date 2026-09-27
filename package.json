@@ -3,6 +3,7 @@
     "private": true,
     "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM blockchains.",
     "scripts": {
+        "changeset": "changeset",
         "check": "pnpm lint && pnpm format:check",
         "check:fix": "pnpm format && pnpm lint:fix",
         "commitlint": "commitlint",
@@ -11,12 +12,15 @@
         "lint": "oxlint --deny-warnings --report-unused-disable-directives . && pnpm lint:variables",
         "lint:fix": "oxlint --fix --deny-warnings --report-unused-disable-directives .",
         "lint:variables": "node scripts/check-untyped-variables.mjs .",
-        "prepare": "simple-git-hooks"
+        "prepare": "simple-git-hooks",
+        "release": "pnpm --filter \"./packages/*\" build && changeset publish",
+        "version-packages": "changeset version && pnpm install --lockfile-only"
     },
     "dependencies": {
-        "@purevm/public": "workspace:*"
+        "@purevm/public": "*"
     },
     "devDependencies": {
+        "@changesets/cli": "^3.0.3",
         "@commitlint/cli": "^21.2.3",
         "@commitlint/config-conventional": "^21.2.3",
         "@types/node": "^26.4.0",

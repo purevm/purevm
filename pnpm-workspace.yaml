@@ -4,3 +4,6 @@ packages:
 
 onlyBuiltDependencies:
   - esbuild
+
+# Resolve internal dependencies to the local package whenever its version satisfies the range.
+linkWorkspacePackages: true

@@ -401,6 +401,42 @@ const block = await ethGetBlockByHash(transport, {
 All transport errors, constants, and retry helpers from `@purevm/transports` are re-exported. See
 `TransportError`, `RpcProviderError`, `RpcTimeoutError`, and `isRetryableError` for typed handling.
 
+## Conversion Utilities
+
+JSON-RPC returns quantities as hex strings. Conversion helpers live in a separate entry point so
+applications that do not need them do not load them:
+
+```ts
+import { createHttpClient } from "@purevm/public";
+import { formatEther, hexToBigInt, hexToNumber, toQuantity } from "@purevm/public/utils";
+
+const client = createHttpClient({ url: "https://ethereum-rpc.publicnode.com" });
+
+const balance = await client.ethGetBalanceByTag({
+  address: "0x0000000000000000000000000000000000000000",
+  blockTag: "latest",
+});
+console.log(formatEther(hexToBigInt(balance)));
+
+const latest = hexToNumber(await client.ethBlockNumber());
+await client.ethGetBlockByNumber({ blockNumber: toQuantity(latest - 1) });
+```
+
+| Helper                                  | Description                                                     |
+| --------------------------------------- | --------------------------------------------------------------- |
+| `hexToBigInt(hex)`                      | Hex data or quantity to `bigint`. `0x` is zero.                 |
+| `hexToNumber(hex)`                      | Hex to `number`; throws above `Number.MAX_SAFE_INTEGER`.        |
+| `toQuantity(value)`                     | Non-negative `number` or `bigint` to a canonical quantity.      |
+| `hexToBytes(hex)` / `bytesToHex(bytes)` | Hex data to `Uint8Array` and back.                              |
+| `isHex(value)` / `isQuantity(value)`    | Type guards for hex data and canonical quantities.              |
+| `formatUnits(value, decimals)`          | Base units to a decimal string, such as `1.5`.                  |
+| `parseUnits(value, decimals)`           | Decimal string to base units; rejects digits beyond `decimals`. |
+| `formatEther` / `parseEther`            | Wei and ether (18 decimals).                                    |
+| `formatGwei` / `parseGwei`              | Wei and gwei (9 decimals).                                      |
+
+Unit conversions are exact `bigint` arithmetic: a value that cannot be represented is rejected
+instead of silently rounded.
+
 ## Development
 
 ```bash

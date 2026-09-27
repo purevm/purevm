@@ -40,6 +40,11 @@
             "import": "./dist/index.mjs",
             "default": "./dist/index.mjs"
         },
+        "./utils": {
+            "types": "./dist/utils.d.mts",
+            "import": "./dist/utils.mjs",
+            "default": "./dist/utils.mjs"
+        },
         "./package.json": "./package.json"
     },
     "publishConfig": {
@@ -65,7 +70,7 @@
         "validate": "pnpm check && pnpm test && pnpm build"
     },
     "dependencies": {
-        "@purevm/transports": "workspace:*"
+        "@purevm/transports": "^0.2.0"
     },
     "devDependencies": {
         "@types/node": "^26.4.0",
