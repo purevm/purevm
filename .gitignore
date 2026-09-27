@@ -9,8 +9,6 @@ node_modules/
 modules/*
 !modules/extensions/
 !modules/extensions/**
-!modules/newHeads/
-!modules/newHeads/**
 !modules/newBlocks/
 !modules/newBlocks/**
 !modules/fetchBlocks/
@@ -27,3 +25,6 @@ modules/*
 # Other package managers
 package-lock.json
 yarn.lock
+
+# Coverage reports, also inside whitelisted modules
+**/coverage/
