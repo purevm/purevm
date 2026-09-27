@@ -17,14 +17,14 @@ export type EthSimulateV1ByHashParameters = {
 type Method = RpcMethodDefinition<
   "eth_simulateV1",
   readonly [EthSimulatePayload, BlockHashReference],
-  RpcSimulatedBlock[]
+  readonly RpcSimulatedBlock[]
 >;
 
 export function ethSimulateV1ByHash<options extends RequestOptions>(
   client: RpcRequester<options>,
   parameters: EthSimulateV1ByHashParameters,
   requestOptions?: options,
-): Promise<RpcSimulatedBlock[]> {
+): Promise<readonly RpcSimulatedBlock[]> {
   return client.request<Method>(
     {
       method: "eth_simulateV1",

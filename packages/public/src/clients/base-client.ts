@@ -65,6 +65,10 @@ import {
   netListening,
   netPeerCount,
   netVersion,
+  txpoolContent,
+  txpoolContentFrom,
+  txpoolInspect,
+  txpoolStatus,
   web3ClientVersion,
   web3Sha3,
   type EthCallByHashParameters,
@@ -82,23 +86,45 @@ import {
   type EthGetBlockByHashParameters,
   type EthGetBlockByNumberParameters,
   type EthGetBlockByTagParameters,
+  type EthGetBlockReceiptsByHashParameters,
+  type EthGetBlockReceiptsByNumberParameters,
+  type EthGetBlockReceiptsByTagParameters,
+  type EthGetBlockTransactionCountByHashParameters,
+  type EthGetBlockTransactionCountByNumberParameters,
+  type EthGetBlockTransactionCountByTagParameters,
   type EthGetCodeByHashParameters,
   type EthGetCodeByNumberParameters,
   type EthGetCodeByTagParameters,
+  type EthGetFilterChangesParameters,
+  type EthGetFilterLogsParameters,
   type EthGetProofByHashParameters,
   type EthGetProofByNumberParameters,
   type EthGetProofByTagParameters,
   type EthGetStorageAtByHashParameters,
   type EthGetStorageAtByNumberParameters,
   type EthGetStorageAtByTagParameters,
+  type EthGetTransactionByBlockHashAndIndexParameters,
+  type EthGetTransactionByBlockNumberAndIndexParameters,
+  type EthGetTransactionByBlockTagAndIndexParameters,
+  type EthGetTransactionByHashParameters,
   type EthGetTransactionCountByHashParameters,
   type EthGetTransactionCountByNumberParameters,
   type EthGetTransactionCountByTagParameters,
+  type EthGetTransactionReceiptParameters,
+  type EthGetUncleByBlockHashAndIndexParameters,
+  type EthGetUncleByBlockNumberAndIndexParameters,
+  type EthGetUncleByBlockTagAndIndexParameters,
+  type EthGetUncleCountByBlockHashParameters,
+  type EthGetUncleCountByBlockNumberParameters,
+  type EthGetUncleCountByBlockTagParameters,
   type EthSimulateV1ByHashParameters,
   type EthSimulateV1ByNumberParameters,
   type EthSimulateV1ByTagParameters,
+  type EthUninstallFilterParameters,
+  type FilterChange,
   type LogsByHashFilter,
   type LogsByRangeFilter,
+  type NetworkId,
   type RpcAccessListResult,
   type RpcAccountProof,
   type RpcBlock,
@@ -108,26 +134,14 @@ import {
   type RpcSyncingStatus,
   type RpcTransaction,
   type RpcTransactionReceipt,
-  txpoolContent,
-  txpoolContentFrom,
-  txpoolInspect,
-  txpoolStatus,
   type TxpoolContent,
   type TxpoolContentFrom,
+  type TxpoolContentFromParameters,
   type TxpoolInspect,
   type TxpoolStatus,
+  type Web3Sha3Parameters,
 } from "../actions/index.js";
-import type {
-  Address,
-  BlockHash,
-  BlockNumber,
-  BlockTag,
-  Hash,
-  Hex,
-  Index,
-  Quantity,
-  TransactionHash,
-} from "../types/primitives.js";
+import type { Hash, Hex, Quantity } from "../types/primitives.js";
 import type { RpcRequester } from "../types/rpc.js";
 
 export class BaseClient<options extends RequestOptions> {
@@ -138,399 +152,417 @@ export class BaseClient<options extends RequestOptions> {
   }
 
   ethBlobBaseFee(options?: options): Promise<Quantity> {
-    return ethBlobBaseFee(this.requester, options);
+    return ethBlobBaseFee<options>(this.requester, options);
   }
 
   ethBlockNumber(options?: options): Promise<Quantity> {
-    return ethBlockNumber(this.requester, options);
+    return ethBlockNumber<options>(this.requester, options);
   }
 
   ethCallByHash(parameters: EthCallByHashParameters, options?: options): Promise<Hex> {
-    return ethCallByHash(this.requester, parameters, options);
+    return ethCallByHash<options>(this.requester, parameters, options);
   }
 
   ethCallByNumber(parameters: EthCallByNumberParameters, options?: options): Promise<Hex> {
-    return ethCallByNumber(this.requester, parameters, options);
+    return ethCallByNumber<options>(this.requester, parameters, options);
   }
 
   ethCallByTag(parameters: EthCallByTagParameters, options?: options): Promise<Hex> {
-    return ethCallByTag(this.requester, parameters, options);
+    return ethCallByTag<options>(this.requester, parameters, options);
   }
 
   ethChainId(options?: options): Promise<Quantity> {
-    return ethChainId(this.requester, options);
+    return ethChainId<options>(this.requester, options);
   }
 
   ethCreateAccessListByNumber(
     parameters: EthCreateAccessListByNumberParameters,
     options?: options,
   ): Promise<RpcAccessListResult> {
-    return ethCreateAccessListByNumber(this.requester, parameters, options);
+    return ethCreateAccessListByNumber<options>(this.requester, parameters, options);
   }
 
   ethCreateAccessListByTag(
     parameters: EthCreateAccessListByTagParameters,
     options?: options,
   ): Promise<RpcAccessListResult> {
-    return ethCreateAccessListByTag(this.requester, parameters, options);
+    return ethCreateAccessListByTag<options>(this.requester, parameters, options);
   }
 
   ethEstimateGasByNumber(
     parameters: EthEstimateGasByNumberParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethEstimateGasByNumber(this.requester, parameters, options);
+    return ethEstimateGasByNumber<options>(this.requester, parameters, options);
   }
 
   ethEstimateGasByTag(
     parameters: EthEstimateGasByTagParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethEstimateGasByTag(this.requester, parameters, options);
+    return ethEstimateGasByTag<options>(this.requester, parameters, options);
   }
 
   ethFeeHistoryByNumber(
     parameters: EthFeeHistoryByNumberParameters,
     options?: options,
   ): Promise<RpcFeeHistory> {
-    return ethFeeHistoryByNumber(this.requester, parameters, options);
+    return ethFeeHistoryByNumber<options>(this.requester, parameters, options);
   }
 
   ethFeeHistoryByTag(
     parameters: EthFeeHistoryByTagParameters,
     options?: options,
   ): Promise<RpcFeeHistory> {
-    return ethFeeHistoryByTag(this.requester, parameters, options);
+    return ethFeeHistoryByTag<options>(this.requester, parameters, options);
   }
 
   ethGasPrice(options?: options): Promise<Quantity> {
-    return ethGasPrice(this.requester, options);
+    return ethGasPrice<options>(this.requester, options);
   }
 
   ethGetBalanceByHash(
     parameters: EthGetBalanceByHashParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethGetBalanceByHash(this.requester, parameters, options);
+    return ethGetBalanceByHash<options>(this.requester, parameters, options);
   }
 
   ethGetBalanceByNumber(
     parameters: EthGetBalanceByNumberParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethGetBalanceByNumber(this.requester, parameters, options);
+    return ethGetBalanceByNumber<options>(this.requester, parameters, options);
   }
 
   ethGetBalanceByTag(
     parameters: EthGetBalanceByTagParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethGetBalanceByTag(this.requester, parameters, options);
+    return ethGetBalanceByTag<options>(this.requester, parameters, options);
   }
 
   ethGetBlockByHash<const full extends boolean = false>(
     parameters: EthGetBlockByHashParameters<full>,
     options?: options,
   ): Promise<RpcBlock<full> | null> {
-    return ethGetBlockByHash(this.requester, parameters, options);
+    return ethGetBlockByHash<full, options>(this.requester, parameters, options);
   }
 
   ethGetBlockByNumber<const full extends boolean = false>(
     parameters: EthGetBlockByNumberParameters<full>,
     options?: options,
   ): Promise<RpcBlock<full> | null> {
-    return ethGetBlockByNumber(this.requester, parameters, options);
+    return ethGetBlockByNumber<full, options>(this.requester, parameters, options);
   }
 
   ethGetBlockByTag<const full extends boolean = false>(
     parameters: EthGetBlockByTagParameters<full>,
     options?: options,
   ): Promise<RpcBlock<full> | null> {
-    return ethGetBlockByTag(this.requester, parameters, options);
+    return ethGetBlockByTag<full, options>(this.requester, parameters, options);
   }
 
   ethGetBlockReceiptsByHash(
-    blockHash: BlockHash,
+    parameters: EthGetBlockReceiptsByHashParameters,
     options?: options,
-  ): Promise<RpcTransactionReceipt[] | null> {
-    return ethGetBlockReceiptsByHash(this.requester, blockHash, options);
+  ): Promise<readonly RpcTransactionReceipt[] | null> {
+    return ethGetBlockReceiptsByHash<options>(this.requester, parameters, options);
   }
 
   ethGetBlockReceiptsByNumber(
-    blockNumber: BlockNumber,
+    parameters: EthGetBlockReceiptsByNumberParameters,
     options?: options,
-  ): Promise<RpcTransactionReceipt[] | null> {
-    return ethGetBlockReceiptsByNumber(this.requester, blockNumber, options);
+  ): Promise<readonly RpcTransactionReceipt[] | null> {
+    return ethGetBlockReceiptsByNumber<options>(this.requester, parameters, options);
   }
 
   ethGetBlockReceiptsByTag(
-    blockTag: BlockTag,
+    parameters: EthGetBlockReceiptsByTagParameters,
     options?: options,
-  ): Promise<RpcTransactionReceipt[] | null> {
-    return ethGetBlockReceiptsByTag(this.requester, blockTag, options);
+  ): Promise<readonly RpcTransactionReceipt[] | null> {
+    return ethGetBlockReceiptsByTag<options>(this.requester, parameters, options);
   }
 
-  ethGetBlockTransactionCountByHash(blockHash: BlockHash, options?: options): Promise<Quantity> {
-    return ethGetBlockTransactionCountByHash(this.requester, blockHash, options);
+  ethGetBlockTransactionCountByHash(
+    parameters: EthGetBlockTransactionCountByHashParameters,
+    options?: options,
+  ): Promise<Quantity> {
+    return ethGetBlockTransactionCountByHash<options>(this.requester, parameters, options);
   }
 
   ethGetBlockTransactionCountByNumber(
-    blockNumber: BlockNumber,
+    parameters: EthGetBlockTransactionCountByNumberParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethGetBlockTransactionCountByNumber(this.requester, blockNumber, options);
+    return ethGetBlockTransactionCountByNumber<options>(this.requester, parameters, options);
   }
 
-  ethGetBlockTransactionCountByTag(blockTag: BlockTag, options?: options): Promise<Quantity> {
-    return ethGetBlockTransactionCountByTag(this.requester, blockTag, options);
+  ethGetBlockTransactionCountByTag(
+    parameters: EthGetBlockTransactionCountByTagParameters,
+    options?: options,
+  ): Promise<Quantity> {
+    return ethGetBlockTransactionCountByTag<options>(this.requester, parameters, options);
   }
 
   ethGetCodeByHash(parameters: EthGetCodeByHashParameters, options?: options): Promise<Hex> {
-    return ethGetCodeByHash(this.requester, parameters, options);
+    return ethGetCodeByHash<options>(this.requester, parameters, options);
   }
 
   ethGetCodeByNumber(parameters: EthGetCodeByNumberParameters, options?: options): Promise<Hex> {
-    return ethGetCodeByNumber(this.requester, parameters, options);
+    return ethGetCodeByNumber<options>(this.requester, parameters, options);
   }
 
   ethGetCodeByTag(parameters: EthGetCodeByTagParameters, options?: options): Promise<Hex> {
-    return ethGetCodeByTag(this.requester, parameters, options);
+    return ethGetCodeByTag<options>(this.requester, parameters, options);
   }
 
-  ethGetFilterChanges<result extends Hash | RpcLog = RpcLog>(
-    filterId: Quantity,
+  ethGetFilterChanges<result extends FilterChange = RpcLog>(
+    parameters: EthGetFilterChangesParameters,
     options?: options,
-  ): Promise<result[]> {
-    return ethGetFilterChanges<result, options>(this.requester, filterId, options);
+  ): Promise<readonly result[]> {
+    return ethGetFilterChanges<result, options>(this.requester, parameters, options);
   }
 
-  ethGetFilterLogs(filterId: Quantity, options?: options): Promise<RpcLog[]> {
-    return ethGetFilterLogs(this.requester, filterId, options);
+  ethGetFilterLogs(
+    parameters: EthGetFilterLogsParameters,
+    options?: options,
+  ): Promise<readonly RpcLog[]> {
+    return ethGetFilterLogs<options>(this.requester, parameters, options);
   }
 
-  ethGetLogsByHash(filter: LogsByHashFilter, options?: options): Promise<RpcLog[]> {
-    return ethGetLogsByHash(this.requester, filter, options);
+  ethGetLogsByHash(filter: LogsByHashFilter, options?: options): Promise<readonly RpcLog[]> {
+    return ethGetLogsByHash<options>(this.requester, filter, options);
   }
 
-  ethGetLogsByRange(filter: LogsByRangeFilter, options?: options): Promise<RpcLog[]> {
-    return ethGetLogsByRange(this.requester, filter, options);
+  ethGetLogsByRange(filter: LogsByRangeFilter, options?: options): Promise<readonly RpcLog[]> {
+    return ethGetLogsByRange<options>(this.requester, filter, options);
   }
 
   ethGetProofByHash(
     parameters: EthGetProofByHashParameters,
     options?: options,
   ): Promise<RpcAccountProof> {
-    return ethGetProofByHash(this.requester, parameters, options);
+    return ethGetProofByHash<options>(this.requester, parameters, options);
   }
 
   ethGetProofByNumber(
     parameters: EthGetProofByNumberParameters,
     options?: options,
   ): Promise<RpcAccountProof> {
-    return ethGetProofByNumber(this.requester, parameters, options);
+    return ethGetProofByNumber<options>(this.requester, parameters, options);
   }
 
   ethGetProofByTag(
     parameters: EthGetProofByTagParameters,
     options?: options,
   ): Promise<RpcAccountProof> {
-    return ethGetProofByTag(this.requester, parameters, options);
+    return ethGetProofByTag<options>(this.requester, parameters, options);
   }
 
   ethGetStorageAtByHash(
     parameters: EthGetStorageAtByHashParameters,
     options?: options,
   ): Promise<Hex> {
-    return ethGetStorageAtByHash(this.requester, parameters, options);
+    return ethGetStorageAtByHash<options>(this.requester, parameters, options);
   }
 
   ethGetStorageAtByNumber(
     parameters: EthGetStorageAtByNumberParameters,
     options?: options,
   ): Promise<Hex> {
-    return ethGetStorageAtByNumber(this.requester, parameters, options);
+    return ethGetStorageAtByNumber<options>(this.requester, parameters, options);
   }
 
   ethGetStorageAtByTag(
     parameters: EthGetStorageAtByTagParameters,
     options?: options,
   ): Promise<Hex> {
-    return ethGetStorageAtByTag(this.requester, parameters, options);
+    return ethGetStorageAtByTag<options>(this.requester, parameters, options);
   }
 
   ethGetTransactionByBlockHashAndIndex(
-    blockHash: BlockHash,
-    index: Index,
+    parameters: EthGetTransactionByBlockHashAndIndexParameters,
     options?: options,
   ): Promise<RpcTransaction | null> {
-    return ethGetTransactionByBlockHashAndIndex(this.requester, blockHash, index, options);
+    return ethGetTransactionByBlockHashAndIndex<options>(this.requester, parameters, options);
   }
 
   ethGetTransactionByBlockNumberAndIndex(
-    blockNumber: BlockNumber,
-    index: Index,
+    parameters: EthGetTransactionByBlockNumberAndIndexParameters,
     options?: options,
   ): Promise<RpcTransaction | null> {
-    return ethGetTransactionByBlockNumberAndIndex(this.requester, blockNumber, index, options);
+    return ethGetTransactionByBlockNumberAndIndex<options>(this.requester, parameters, options);
   }
 
   ethGetTransactionByBlockTagAndIndex(
-    blockTag: BlockTag,
-    index: Index,
+    parameters: EthGetTransactionByBlockTagAndIndexParameters,
     options?: options,
   ): Promise<RpcTransaction | null> {
-    return ethGetTransactionByBlockTagAndIndex(this.requester, blockTag, index, options);
+    return ethGetTransactionByBlockTagAndIndex<options>(this.requester, parameters, options);
   }
 
   ethGetTransactionByHash(
-    transactionHash: TransactionHash,
+    parameters: EthGetTransactionByHashParameters,
     options?: options,
   ): Promise<RpcTransaction | null> {
-    return ethGetTransactionByHash(this.requester, transactionHash, options);
+    return ethGetTransactionByHash<options>(this.requester, parameters, options);
   }
 
   ethGetTransactionCountByHash(
     parameters: EthGetTransactionCountByHashParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethGetTransactionCountByHash(this.requester, parameters, options);
+    return ethGetTransactionCountByHash<options>(this.requester, parameters, options);
   }
 
   ethGetTransactionCountByNumber(
     parameters: EthGetTransactionCountByNumberParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethGetTransactionCountByNumber(this.requester, parameters, options);
+    return ethGetTransactionCountByNumber<options>(this.requester, parameters, options);
   }
 
   ethGetTransactionCountByTag(
     parameters: EthGetTransactionCountByTagParameters,
     options?: options,
   ): Promise<Quantity> {
-    return ethGetTransactionCountByTag(this.requester, parameters, options);
+    return ethGetTransactionCountByTag<options>(this.requester, parameters, options);
   }
 
   ethGetTransactionReceipt(
-    transactionHash: TransactionHash,
+    parameters: EthGetTransactionReceiptParameters,
     options?: options,
   ): Promise<RpcTransactionReceipt | null> {
-    return ethGetTransactionReceipt(this.requester, transactionHash, options);
+    return ethGetTransactionReceipt<options>(this.requester, parameters, options);
   }
 
   ethGetUncleByBlockHashAndIndex(
-    blockHash: BlockHash,
-    index: Index,
+    parameters: EthGetUncleByBlockHashAndIndexParameters,
     options?: options,
   ): Promise<RpcBlock<false> | null> {
-    return ethGetUncleByBlockHashAndIndex(this.requester, blockHash, index, options);
+    return ethGetUncleByBlockHashAndIndex<options>(this.requester, parameters, options);
   }
 
   ethGetUncleByBlockNumberAndIndex(
-    blockNumber: BlockNumber,
-    index: Index,
+    parameters: EthGetUncleByBlockNumberAndIndexParameters,
     options?: options,
   ): Promise<RpcBlock<false> | null> {
-    return ethGetUncleByBlockNumberAndIndex(this.requester, blockNumber, index, options);
+    return ethGetUncleByBlockNumberAndIndex<options>(this.requester, parameters, options);
   }
 
   ethGetUncleByBlockTagAndIndex(
-    blockTag: BlockTag,
-    index: Index,
+    parameters: EthGetUncleByBlockTagAndIndexParameters,
     options?: options,
   ): Promise<RpcBlock<false> | null> {
-    return ethGetUncleByBlockTagAndIndex(this.requester, blockTag, index, options);
+    return ethGetUncleByBlockTagAndIndex<options>(this.requester, parameters, options);
   }
 
-  ethGetUncleCountByBlockHash(blockHash: BlockHash, options?: options): Promise<Quantity> {
-    return ethGetUncleCountByBlockHash(this.requester, blockHash, options);
+  ethGetUncleCountByBlockHash(
+    parameters: EthGetUncleCountByBlockHashParameters,
+    options?: options,
+  ): Promise<Quantity> {
+    return ethGetUncleCountByBlockHash<options>(this.requester, parameters, options);
   }
 
-  ethGetUncleCountByBlockNumber(blockNumber: BlockNumber, options?: options): Promise<Quantity> {
-    return ethGetUncleCountByBlockNumber(this.requester, blockNumber, options);
+  ethGetUncleCountByBlockNumber(
+    parameters: EthGetUncleCountByBlockNumberParameters,
+    options?: options,
+  ): Promise<Quantity> {
+    return ethGetUncleCountByBlockNumber<options>(this.requester, parameters, options);
   }
 
-  ethGetUncleCountByBlockTag(blockTag: BlockTag, options?: options): Promise<Quantity> {
-    return ethGetUncleCountByBlockTag(this.requester, blockTag, options);
+  ethGetUncleCountByBlockTag(
+    parameters: EthGetUncleCountByBlockTagParameters,
+    options?: options,
+  ): Promise<Quantity> {
+    return ethGetUncleCountByBlockTag<options>(this.requester, parameters, options);
   }
 
   ethMaxPriorityFeePerGas(options?: options): Promise<Quantity> {
-    return ethMaxPriorityFeePerGas(this.requester, options);
+    return ethMaxPriorityFeePerGas<options>(this.requester, options);
   }
 
   ethNewBlockFilter(options?: options): Promise<Quantity> {
-    return ethNewBlockFilter(this.requester, options);
+    return ethNewBlockFilter<options>(this.requester, options);
   }
 
   ethNewFilter(filter: LogsByRangeFilter, options?: options): Promise<Quantity> {
-    return ethNewFilter(this.requester, filter, options);
+    return ethNewFilter<options>(this.requester, filter, options);
   }
 
   ethNewPendingTransactionFilter(options?: options): Promise<Quantity> {
-    return ethNewPendingTransactionFilter(this.requester, options);
+    return ethNewPendingTransactionFilter<options>(this.requester, options);
   }
 
   ethSimulateV1ByHash(
     parameters: EthSimulateV1ByHashParameters,
     options?: options,
-  ): Promise<RpcSimulatedBlock[]> {
-    return ethSimulateV1ByHash(this.requester, parameters, options);
+  ): Promise<readonly RpcSimulatedBlock[]> {
+    return ethSimulateV1ByHash<options>(this.requester, parameters, options);
   }
 
   ethSimulateV1ByNumber(
     parameters: EthSimulateV1ByNumberParameters,
     options?: options,
-  ): Promise<RpcSimulatedBlock[]> {
-    return ethSimulateV1ByNumber(this.requester, parameters, options);
+  ): Promise<readonly RpcSimulatedBlock[]> {
+    return ethSimulateV1ByNumber<options>(this.requester, parameters, options);
   }
 
   ethSimulateV1ByTag(
     parameters: EthSimulateV1ByTagParameters,
     options?: options,
-  ): Promise<RpcSimulatedBlock[]> {
-    return ethSimulateV1ByTag(this.requester, parameters, options);
+  ): Promise<readonly RpcSimulatedBlock[]> {
+    return ethSimulateV1ByTag<options>(this.requester, parameters, options);
   }
 
   ethSyncing(options?: options): Promise<false | RpcSyncingStatus> {
-    return ethSyncing(this.requester, options);
+    return ethSyncing<options>(this.requester, options);
   }
 
-  ethUninstallFilter(filterId: Quantity, options?: options): Promise<boolean> {
-    return ethUninstallFilter(this.requester, filterId, options);
+  ethUninstallFilter(
+    parameters: EthUninstallFilterParameters,
+    options?: options,
+  ): Promise<boolean> {
+    return ethUninstallFilter<options>(this.requester, parameters, options);
   }
 
   netListening(options?: options): Promise<boolean> {
-    return netListening(this.requester, options);
+    return netListening<options>(this.requester, options);
   }
 
   netPeerCount(options?: options): Promise<Quantity> {
-    return netPeerCount(this.requester, options);
+    return netPeerCount<options>(this.requester, options);
   }
 
-  netVersion(options?: options): Promise<string> {
-    return netVersion(this.requester, options);
+  netVersion(options?: options): Promise<NetworkId> {
+    return netVersion<options>(this.requester, options);
   }
 
   txpoolContent(options?: options): Promise<TxpoolContent> {
-    return txpoolContent(this.requester, options);
+    return txpoolContent<options>(this.requester, options);
   }
 
-  txpoolContentFrom(address: Address, options?: options): Promise<TxpoolContentFrom> {
-    return txpoolContentFrom(this.requester, address, options);
+  txpoolContentFrom(
+    parameters: TxpoolContentFromParameters,
+    options?: options,
+  ): Promise<TxpoolContentFrom> {
+    return txpoolContentFrom<options>(this.requester, parameters, options);
   }
 
   txpoolInspect(options?: options): Promise<TxpoolInspect> {
-    return txpoolInspect(this.requester, options);
+    return txpoolInspect<options>(this.requester, options);
   }
 
   txpoolStatus(options?: options): Promise<TxpoolStatus> {
-    return txpoolStatus(this.requester, options);
+    return txpoolStatus<options>(this.requester, options);
   }
 
   web3ClientVersion(options?: options): Promise<string> {
-    return web3ClientVersion(this.requester, options);
+    return web3ClientVersion<options>(this.requester, options);
   }
 
-  web3Sha3(data: Hex, options?: options): Promise<Hash> {
-    return web3Sha3(this.requester, data, options);
+  web3Sha3(parameters: Web3Sha3Parameters, options?: options): Promise<Hash> {
+    return web3Sha3<options>(this.requester, parameters, options);
   }
 }

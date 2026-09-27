@@ -25,7 +25,7 @@ export type TraceCallAction = {
 
 export type TraceCreateAction = {
   /** Creation opcode used when supplied by the client. */
-  creationMethod?: TraceCreateType;
+  creationMethod?: TraceCreateType | undefined;
   /** Address that initiated contract creation. */
   from: Address;
   /** Gas supplied for contract creation. */
@@ -72,11 +72,11 @@ export type TraceCreateResult = {
 
 type TraceBase = {
   /** Execution error, when the traced operation failed. */
-  error?: string;
+  error?: string | undefined;
   /** Number of direct child traces. */
   subtraces: number;
   /** Path locating this trace in the transaction call tree. */
-  traceAddress: number[];
+  traceAddress: readonly number[];
 };
 
 type TraceBlockBase = TraceBase & {
@@ -157,30 +157,30 @@ export type TraceAccountStateDiff = {
 export type TraceStateDiff = Record<Address, TraceAccountStateDiff>;
 
 export type TraceVmExecutedOperation = {
-  mem?: { data: Hex; off: number };
-  push?: Hex[];
-  store?: { key: Hex; val: Hex };
+  mem?: { data: Hex; off: number } | undefined;
+  push?: readonly Hex[] | undefined;
+  store?: { key: Hex; val: Hex } | undefined;
   used: number;
 };
 
 export type TraceVmOperation = {
   cost: number;
-  ex?: TraceVmExecutedOperation;
+  ex?: TraceVmExecutedOperation | undefined;
   idx: string;
   op: string;
   pc: number;
-  sub?: TraceVmTrace | null;
+  sub?: TraceVmTrace | null | undefined;
 };
 
 export type TraceVmTrace = {
   code: Hex;
-  ops: TraceVmOperation[];
+  ops: readonly TraceVmOperation[];
 };
 
 export type TraceReplayResult = {
   output: Hex;
   stateDiff: TraceStateDiff | null;
-  trace: TraceResultEntry[];
+  trace: readonly TraceResultEntry[];
   vmTrace: TraceVmTrace | null;
 };
 

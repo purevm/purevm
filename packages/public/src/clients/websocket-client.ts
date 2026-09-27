@@ -16,16 +16,16 @@ import { BaseClient } from "./base-client.js";
 
 export type SubscriptionHandlers<result> = {
   onData(result: result): void;
-  onError?: (error: Error) => void;
+  onError?: ((error: Error) => void) | undefined;
 };
 
 export type LogsSubscriptionOptions = SubscriptionHandlers<LogsSubscriptionResult> & {
-  filter?: LogsSubscriptionFilter;
+  filter?: LogsSubscriptionFilter | undefined;
 };
 
 export type PendingTransactionsSubscriptionOptions<full extends boolean = false> =
   SubscriptionHandlers<PendingTransactionSubscriptionResult<full>> & {
-    fullTransactions?: full;
+    fullTransactions?: full | undefined;
   };
 
 export class WebSocketClient extends BaseClient<RequestOptions> {

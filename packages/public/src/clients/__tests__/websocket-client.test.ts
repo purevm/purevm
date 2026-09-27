@@ -98,7 +98,7 @@ test("exposes txpool actions over WebSocket", async () => {
   });
 
   await client.txpoolStatus();
-  await client.txpoolContentFrom("0x1234");
+  await client.txpoolContentFrom({ address: "0x1234" });
 
   expect(socket.sent.map(({ method, params }) => ({ method, params }))).toEqual([
     { method: "txpool_status", params: undefined },

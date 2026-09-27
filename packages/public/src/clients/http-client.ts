@@ -42,25 +42,47 @@ import {
   type CallTracerConfig,
   type DebugBadBlock,
   type DebugBlockTrace,
+  type DebugGetRawBlockByHashParameters,
+  type DebugGetRawBlockByNumberParameters,
+  type DebugGetRawBlockByTagParameters,
+  type DebugGetRawHeaderByHashParameters,
+  type DebugGetRawHeaderByNumberParameters,
+  type DebugGetRawHeaderByTagParameters,
+  type DebugGetRawReceiptsByHashParameters,
+  type DebugGetRawReceiptsByNumberParameters,
+  type DebugGetRawReceiptsByTagParameters,
+  type DebugGetRawTransactionParameters,
+  type DebugTraceBlockByHashParameters,
+  type DebugTraceBlockByNumberParameters,
+  type DebugTraceBlockByTagParameters,
+  type DebugTraceCallByHashParameters,
+  type DebugTraceCallByNumberParameters,
+  type DebugTraceCallByTagParameters,
   type DebugTraceCallConfig,
   type DebugTraceConfig,
   type DebugTraceResult,
-  type RpcCallRequest,
-  type TraceCallManyEntry,
+  type DebugTraceTransactionParameters,
+  type TraceBlockByHashParameters,
+  type TraceBlockByNumberParameters,
+  type TraceBlockByTagParameters,
+  type TraceCallByHashParameters,
+  type TraceCallByNumberParameters,
+  type TraceCallByTagParameters,
+  type TraceCallManyByHashParameters,
+  type TraceCallManyByNumberParameters,
+  type TraceCallManyByTagParameters,
   type TraceEntry,
   type TraceFilterParameters,
+  type TraceGetParameters,
+  type TraceReplayBlockTransactionsByHashParameters,
+  type TraceReplayBlockTransactionsByNumberParameters,
+  type TraceReplayBlockTransactionsByTagParameters,
   type TraceReplayResult,
+  type TraceReplayTransactionParameters,
   type TraceReplayTransactionResult,
-  type TraceType,
+  type TraceTransactionParameters,
 } from "../actions/index.js";
-import type {
-  BlockHash,
-  BlockNumber,
-  BlockTag,
-  Hex,
-  Quantity,
-  TransactionHash,
-} from "../types/primitives.js";
+import type { Hex } from "../types/primitives.js";
 import { BaseClient } from "./base-client.js";
 
 export class HttpClient extends BaseClient<HttpRequestOptions> {
@@ -68,230 +90,239 @@ export class HttpClient extends BaseClient<HttpRequestOptions> {
     super(new HttpTransport(options));
   }
 
-  debugGetBadBlocks(options?: HttpRequestOptions): Promise<DebugBadBlock[]> {
+  debugGetBadBlocks(options?: HttpRequestOptions): Promise<readonly DebugBadBlock[]> {
     return debugGetBadBlocks(this.requester, options);
   }
 
-  debugGetRawBlockByHash(blockHash: BlockHash, options?: HttpRequestOptions): Promise<Hex> {
-    return debugGetRawBlockByHash(this.requester, blockHash, options);
+  debugGetRawBlockByHash(
+    parameters: DebugGetRawBlockByHashParameters,
+    options?: HttpRequestOptions,
+  ): Promise<Hex> {
+    return debugGetRawBlockByHash(this.requester, parameters, options);
   }
 
-  debugGetRawBlockByNumber(blockNumber: BlockNumber, options?: HttpRequestOptions): Promise<Hex> {
-    return debugGetRawBlockByNumber(this.requester, blockNumber, options);
+  debugGetRawBlockByNumber(
+    parameters: DebugGetRawBlockByNumberParameters,
+    options?: HttpRequestOptions,
+  ): Promise<Hex> {
+    return debugGetRawBlockByNumber(this.requester, parameters, options);
   }
 
-  debugGetRawBlockByTag(blockTag: BlockTag, options?: HttpRequestOptions): Promise<Hex> {
-    return debugGetRawBlockByTag(this.requester, blockTag, options);
+  debugGetRawBlockByTag(
+    parameters: DebugGetRawBlockByTagParameters,
+    options?: HttpRequestOptions,
+  ): Promise<Hex> {
+    return debugGetRawBlockByTag(this.requester, parameters, options);
   }
 
-  debugGetRawHeaderByHash(blockHash: BlockHash, options?: HttpRequestOptions): Promise<Hex> {
-    return debugGetRawHeaderByHash(this.requester, blockHash, options);
+  debugGetRawHeaderByHash(
+    parameters: DebugGetRawHeaderByHashParameters,
+    options?: HttpRequestOptions,
+  ): Promise<Hex> {
+    return debugGetRawHeaderByHash(this.requester, parameters, options);
   }
 
-  debugGetRawHeaderByNumber(blockNumber: BlockNumber, options?: HttpRequestOptions): Promise<Hex> {
-    return debugGetRawHeaderByNumber(this.requester, blockNumber, options);
+  debugGetRawHeaderByNumber(
+    parameters: DebugGetRawHeaderByNumberParameters,
+    options?: HttpRequestOptions,
+  ): Promise<Hex> {
+    return debugGetRawHeaderByNumber(this.requester, parameters, options);
   }
 
-  debugGetRawHeaderByTag(blockTag: BlockTag, options?: HttpRequestOptions): Promise<Hex> {
-    return debugGetRawHeaderByTag(this.requester, blockTag, options);
+  debugGetRawHeaderByTag(
+    parameters: DebugGetRawHeaderByTagParameters,
+    options?: HttpRequestOptions,
+  ): Promise<Hex> {
+    return debugGetRawHeaderByTag(this.requester, parameters, options);
   }
 
-  debugGetRawReceiptsByHash(blockHash: BlockHash, options?: HttpRequestOptions): Promise<Hex[]> {
-    return debugGetRawReceiptsByHash(this.requester, blockHash, options);
+  debugGetRawReceiptsByHash(
+    parameters: DebugGetRawReceiptsByHashParameters,
+    options?: HttpRequestOptions,
+  ): Promise<readonly Hex[]> {
+    return debugGetRawReceiptsByHash(this.requester, parameters, options);
   }
 
   debugGetRawReceiptsByNumber(
-    blockNumber: BlockNumber,
+    parameters: DebugGetRawReceiptsByNumberParameters,
     options?: HttpRequestOptions,
-  ): Promise<Hex[]> {
-    return debugGetRawReceiptsByNumber(this.requester, blockNumber, options);
+  ): Promise<readonly Hex[]> {
+    return debugGetRawReceiptsByNumber(this.requester, parameters, options);
   }
 
-  debugGetRawReceiptsByTag(blockTag: BlockTag, options?: HttpRequestOptions): Promise<Hex[]> {
-    return debugGetRawReceiptsByTag(this.requester, blockTag, options);
+  debugGetRawReceiptsByTag(
+    parameters: DebugGetRawReceiptsByTagParameters,
+    options?: HttpRequestOptions,
+  ): Promise<readonly Hex[]> {
+    return debugGetRawReceiptsByTag(this.requester, parameters, options);
   }
 
   debugGetRawTransaction(
-    transactionHash: TransactionHash,
+    parameters: DebugGetRawTransactionParameters,
     options?: HttpRequestOptions,
   ): Promise<Hex> {
-    return debugGetRawTransaction(this.requester, transactionHash, options);
+    return debugGetRawTransaction(this.requester, parameters, options);
   }
 
   debugTraceBlockByHash<const config extends DebugTraceConfig = CallTracerConfig>(
-    blockHash: BlockHash,
-    config?: config,
+    parameters: DebugTraceBlockByHashParameters<config>,
     options?: HttpRequestOptions,
-  ): Promise<DebugBlockTrace<DebugTraceResult<config>>[]> {
-    return debugTraceBlockByHash(this.requester, blockHash, config, options);
+  ): Promise<readonly DebugBlockTrace<DebugTraceResult<config>>[]> {
+    return debugTraceBlockByHash<config>(this.requester, parameters, options);
   }
 
   debugTraceBlockByNumber<const config extends DebugTraceConfig = CallTracerConfig>(
-    blockNumber: BlockNumber,
-    config?: config,
+    parameters: DebugTraceBlockByNumberParameters<config>,
     options?: HttpRequestOptions,
-  ): Promise<DebugBlockTrace<DebugTraceResult<config>>[]> {
-    return debugTraceBlockByNumber(this.requester, blockNumber, config, options);
+  ): Promise<readonly DebugBlockTrace<DebugTraceResult<config>>[]> {
+    return debugTraceBlockByNumber<config>(this.requester, parameters, options);
   }
 
   debugTraceBlockByTag<const config extends DebugTraceConfig = CallTracerConfig>(
-    blockTag: BlockTag,
-    config?: config,
+    parameters: DebugTraceBlockByTagParameters<config>,
     options?: HttpRequestOptions,
-  ): Promise<DebugBlockTrace<DebugTraceResult<config>>[]> {
-    return debugTraceBlockByTag(this.requester, blockTag, config, options);
+  ): Promise<readonly DebugBlockTrace<DebugTraceResult<config>>[]> {
+    return debugTraceBlockByTag<config>(this.requester, parameters, options);
   }
 
   debugTraceCallByHash<const config extends DebugTraceCallConfig = CallTracerConfig>(
-    call: RpcCallRequest,
-    blockHash: BlockHash,
-    config?: config,
+    parameters: DebugTraceCallByHashParameters<config>,
     options?: HttpRequestOptions,
   ): Promise<DebugTraceResult<config>> {
-    return debugTraceCallByHash(this.requester, call, blockHash, config, options);
+    return debugTraceCallByHash<config>(this.requester, parameters, options);
   }
 
   debugTraceCallByNumber<const config extends DebugTraceCallConfig = CallTracerConfig>(
-    call: RpcCallRequest,
-    blockNumber: BlockNumber,
-    config?: config,
+    parameters: DebugTraceCallByNumberParameters<config>,
     options?: HttpRequestOptions,
   ): Promise<DebugTraceResult<config>> {
-    return debugTraceCallByNumber(this.requester, call, blockNumber, config, options);
+    return debugTraceCallByNumber<config>(this.requester, parameters, options);
   }
 
   debugTraceCallByTag<const config extends DebugTraceCallConfig = CallTracerConfig>(
-    call: RpcCallRequest,
-    blockTag: BlockTag,
-    config?: config,
+    parameters: DebugTraceCallByTagParameters<config>,
     options?: HttpRequestOptions,
   ): Promise<DebugTraceResult<config>> {
-    return debugTraceCallByTag(this.requester, call, blockTag, config, options);
+    return debugTraceCallByTag<config>(this.requester, parameters, options);
   }
 
   debugTraceTransaction<const config extends DebugTraceConfig = CallTracerConfig>(
-    transactionHash: TransactionHash,
-    config?: config,
+    parameters: DebugTraceTransactionParameters<config>,
     options?: HttpRequestOptions,
   ): Promise<DebugTraceResult<config>> {
-    return debugTraceTransaction(this.requester, transactionHash, config, options);
+    return debugTraceTransaction<config>(this.requester, parameters, options);
   }
 
-  traceBlockByHash(blockHash: BlockHash, options?: HttpRequestOptions): Promise<TraceEntry[]> {
-    return traceBlockByHash(this.requester, blockHash, options);
+  traceBlockByHash(
+    parameters: TraceBlockByHashParameters,
+    options?: HttpRequestOptions,
+  ): Promise<readonly TraceEntry[]> {
+    return traceBlockByHash(this.requester, parameters, options);
   }
 
   traceBlockByNumber(
-    blockNumber: BlockNumber,
+    parameters: TraceBlockByNumberParameters,
     options?: HttpRequestOptions,
-  ): Promise<TraceEntry[]> {
-    return traceBlockByNumber(this.requester, blockNumber, options);
+  ): Promise<readonly TraceEntry[]> {
+    return traceBlockByNumber(this.requester, parameters, options);
   }
 
-  traceBlockByTag(blockTag: BlockTag, options?: HttpRequestOptions): Promise<TraceEntry[]> {
-    return traceBlockByTag(this.requester, blockTag, options);
+  traceBlockByTag(
+    parameters: TraceBlockByTagParameters,
+    options?: HttpRequestOptions,
+  ): Promise<readonly TraceEntry[]> {
+    return traceBlockByTag(this.requester, parameters, options);
   }
 
   traceCallByHash(
-    call: RpcCallRequest,
-    traceTypes: readonly TraceType[],
-    blockHash: BlockHash,
+    parameters: TraceCallByHashParameters,
     options?: HttpRequestOptions,
   ): Promise<TraceReplayResult> {
-    return traceCallByHash(this.requester, call, traceTypes, blockHash, options);
+    return traceCallByHash(this.requester, parameters, options);
   }
 
   traceCallByNumber(
-    call: RpcCallRequest,
-    traceTypes: readonly TraceType[],
-    blockNumber: BlockNumber,
+    parameters: TraceCallByNumberParameters,
     options?: HttpRequestOptions,
   ): Promise<TraceReplayResult> {
-    return traceCallByNumber(this.requester, call, traceTypes, blockNumber, options);
+    return traceCallByNumber(this.requester, parameters, options);
   }
 
   traceCallByTag(
-    call: RpcCallRequest,
-    traceTypes: readonly TraceType[],
-    blockTag: BlockTag,
+    parameters: TraceCallByTagParameters,
     options?: HttpRequestOptions,
   ): Promise<TraceReplayResult> {
-    return traceCallByTag(this.requester, call, traceTypes, blockTag, options);
+    return traceCallByTag(this.requester, parameters, options);
   }
 
   traceCallManyByHash(
-    calls: readonly TraceCallManyEntry[],
-    blockHash: BlockHash,
+    parameters: TraceCallManyByHashParameters,
     options?: HttpRequestOptions,
-  ): Promise<TraceReplayResult[]> {
-    return traceCallManyByHash(this.requester, calls, blockHash, options);
+  ): Promise<readonly TraceReplayResult[]> {
+    return traceCallManyByHash(this.requester, parameters, options);
   }
 
   traceCallManyByNumber(
-    calls: readonly TraceCallManyEntry[],
-    blockNumber: BlockNumber,
+    parameters: TraceCallManyByNumberParameters,
     options?: HttpRequestOptions,
-  ): Promise<TraceReplayResult[]> {
-    return traceCallManyByNumber(this.requester, calls, blockNumber, options);
+  ): Promise<readonly TraceReplayResult[]> {
+    return traceCallManyByNumber(this.requester, parameters, options);
   }
 
   traceCallManyByTag(
-    calls: readonly TraceCallManyEntry[],
-    blockTag: BlockTag,
+    parameters: TraceCallManyByTagParameters,
     options?: HttpRequestOptions,
-  ): Promise<TraceReplayResult[]> {
-    return traceCallManyByTag(this.requester, calls, blockTag, options);
+  ): Promise<readonly TraceReplayResult[]> {
+    return traceCallManyByTag(this.requester, parameters, options);
   }
 
-  traceFilter(filter: TraceFilterParameters, options?: HttpRequestOptions): Promise<TraceEntry[]> {
+  traceFilter(
+    filter: TraceFilterParameters,
+    options?: HttpRequestOptions,
+  ): Promise<readonly TraceEntry[]> {
     return traceFilter(this.requester, filter, options);
   }
 
   traceGet(
-    transactionHash: TransactionHash,
-    traceAddress: readonly Quantity[],
+    parameters: TraceGetParameters,
     options?: HttpRequestOptions,
   ): Promise<TraceEntry | null> {
-    return traceGet(this.requester, transactionHash, traceAddress, options);
+    return traceGet(this.requester, parameters, options);
   }
 
   traceReplayBlockTransactionsByHash(
-    blockHash: BlockHash,
-    traceTypes: readonly TraceType[],
+    parameters: TraceReplayBlockTransactionsByHashParameters,
     options?: HttpRequestOptions,
-  ): Promise<TraceReplayTransactionResult[]> {
-    return traceReplayBlockTransactionsByHash(this.requester, blockHash, traceTypes, options);
+  ): Promise<readonly TraceReplayTransactionResult[]> {
+    return traceReplayBlockTransactionsByHash(this.requester, parameters, options);
   }
 
   traceReplayBlockTransactionsByNumber(
-    blockNumber: BlockNumber,
-    traceTypes: readonly TraceType[],
+    parameters: TraceReplayBlockTransactionsByNumberParameters,
     options?: HttpRequestOptions,
-  ): Promise<TraceReplayTransactionResult[]> {
-    return traceReplayBlockTransactionsByNumber(this.requester, blockNumber, traceTypes, options);
+  ): Promise<readonly TraceReplayTransactionResult[]> {
+    return traceReplayBlockTransactionsByNumber(this.requester, parameters, options);
   }
 
   traceReplayBlockTransactionsByTag(
-    blockTag: BlockTag,
-    traceTypes: readonly TraceType[],
+    parameters: TraceReplayBlockTransactionsByTagParameters,
     options?: HttpRequestOptions,
-  ): Promise<TraceReplayTransactionResult[]> {
-    return traceReplayBlockTransactionsByTag(this.requester, blockTag, traceTypes, options);
+  ): Promise<readonly TraceReplayTransactionResult[]> {
+    return traceReplayBlockTransactionsByTag(this.requester, parameters, options);
   }
 
   traceReplayTransaction(
-    transactionHash: TransactionHash,
-    traceTypes: readonly TraceType[],
+    parameters: TraceReplayTransactionParameters,
     options?: HttpRequestOptions,
   ): Promise<TraceReplayResult> {
-    return traceReplayTransaction(this.requester, transactionHash, traceTypes, options);
+    return traceReplayTransaction(this.requester, parameters, options);
   }
 
   traceTransaction(
-    transactionHash: TransactionHash,
+    parameters: TraceTransactionParameters,
     options?: HttpRequestOptions,
-  ): Promise<TraceEntry[]> {
-    return traceTransaction(this.requester, transactionHash, options);
+  ): Promise<readonly TraceEntry[]> {
+    return traceTransaction(this.requester, parameters, options);
   }
 }
 

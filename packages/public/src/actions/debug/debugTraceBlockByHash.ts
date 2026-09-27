@@ -10,18 +10,30 @@ import type {
   DebugTraceResult,
 } from "./types.js";
 
+export type DebugTraceBlockByHashParameters<config extends DebugTraceConfig = CallTracerConfig> = {
+  /** Hash of the target block. */
+  blockHash: BlockHash;
+  /** Tracer configuration. Defaults to `callTracer`. */
+  config?: config | undefined;
+};
+
 /** Traces every transaction of the block with this hash. The result type follows `config.tracer`, which defaults to `callTracer`. */
 export function debugTraceBlockByHash<const config extends DebugTraceConfig = CallTracerConfig>(
   client: RpcRequester<HttpRequestOptions>,
-  blockHash: BlockHash,
-  config?: config,
+  parameters: DebugTraceBlockByHashParameters<config>,
   options?: HttpRequestOptions,
-): Promise<DebugBlockTrace<DebugTraceResult<config>>[]> {
+): Promise<readonly DebugBlockTrace<DebugTraceResult<config>>[]> {
   return client.request<
     RpcMethodDefinition<
       "debug_traceBlockByHash",
       readonly [BlockHash, DebugTraceConfig],
-      DebugBlockTrace<DebugTraceResult<config>>[]
+      readonly DebugBlockTrace<DebugTraceResult<config>>[]
     >
-  >({ method: "debug_traceBlockByHash", params: [blockHash, config ?? DEFAULT_TRACER] }, options);
+  >(
+    {
+      method: "debug_traceBlockByHash",
+      params: [parameters.blockHash, parameters.config ?? DEFAULT_TRACER],
+    },
+    options,
+  );
 }

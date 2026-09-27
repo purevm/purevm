@@ -30,14 +30,14 @@ export type DebugCallLogFrame = {
   /** Position relative to child calls in this frame. */
   position: number;
   /** Indexed event values emitted by the call. */
-  topics: Hex[];
+  topics: readonly Hex[];
 };
 
 export type DebugCallFrame = {
   /** Nested calls made by this frame. */
-  calls?: DebugCallFrame[];
+  calls?: readonly DebugCallFrame[] | undefined;
   /** Execution error reported by the tracer. */
-  error?: string;
+  error?: string | undefined;
   /** Address that initiated the call. */
   from: Address;
   /** Gas available before execution of this call. */
@@ -47,17 +47,17 @@ export type DebugCallFrame = {
   /** Calldata or contract creation bytecode. */
   input: Hex;
   /** Logs emitted directly by this call when `withLog` is enabled. */
-  logs?: DebugCallLogFrame[];
+  logs?: readonly DebugCallLogFrame[] | undefined;
   /** Return data produced by the call. */
-  output?: Hex;
+  output?: Hex | undefined;
   /** Decoded revert reason when available. */
-  revertReason?: string;
+  revertReason?: string | undefined;
   /** Called address, absent for some creation and self-destruct frames. */
-  to?: Address;
+  to?: Address | undefined;
   /** EVM call or creation operation represented by this frame. */
   type: DebugCallType;
   /** Amount of wei transferred by the call. */
-  value?: Quantity;
+  value?: Quantity | undefined;
 };
 
 /** Options shared by every `debug_trace*` configuration. */
@@ -124,8 +124,8 @@ export type MuxTracerConfig = TraceOptions & {
   tracer: "muxTracer";
   tracerConfig: {
     "4byteTracer"?: Record<string, never> | undefined;
-    callTracer?: CallTracerConfig["tracerConfig"];
-    flatCallTracer?: FlatCallTracerConfig["tracerConfig"];
+    callTracer?: CallTracerConfig["tracerConfig"] | undefined;
+    flatCallTracer?: FlatCallTracerConfig["tracerConfig"] | undefined;
     noopTracer?: Record<string, never> | undefined;
     prestateTracer?:
       | PrestateTracerConfig["tracerConfig"]
@@ -216,7 +216,7 @@ export type DebugTraceResult<config extends DebugTraceConfig> = config extends {
 }
   ? DebugCallFrame
   : config extends { tracer: "flatCallTracer" }
-    ? TraceEntry[]
+    ? readonly TraceEntry[]
     : config extends { tracer: "prestateTracer"; tracerConfig: { diffMode: true } }
       ? DebugPrestateDiff
       : config extends { tracer: "prestateTracer" }

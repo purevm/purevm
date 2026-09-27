@@ -43,4 +43,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm --filter @purevm/transports build
+
       - run: pnpm --filter @purevm/public validate

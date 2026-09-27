@@ -4,19 +4,24 @@ import type { BlockHash } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 import type { RpcTransactionReceipt } from "./types.js";
 
+export type EthGetBlockReceiptsByHashParameters = {
+  /** Hash of the target block. */
+  blockHash: BlockHash;
+};
+
 type EthGetBlockReceiptsByHash = RpcMethodDefinition<
   "eth_getBlockReceipts",
   readonly [BlockHash],
-  RpcTransactionReceipt[] | null
+  readonly RpcTransactionReceipt[] | null
 >;
 
 export function ethGetBlockReceiptsByHash<options extends RequestOptions>(
   client: RpcRequester<options>,
-  blockHash: BlockHash,
+  parameters: EthGetBlockReceiptsByHashParameters,
   requestOptions?: options,
-): Promise<RpcTransactionReceipt[] | null> {
+): Promise<readonly RpcTransactionReceipt[] | null> {
   return client.request<EthGetBlockReceiptsByHash>(
-    { method: "eth_getBlockReceipts", params: [blockHash] },
+    { method: "eth_getBlockReceipts", params: [parameters.blockHash] },
     requestOptions,
   );
 }

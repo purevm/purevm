@@ -79,11 +79,13 @@ async function acceptHead(head: NewHeadsSubscriptionResult): Promise<void> {
   const methods = await Promise.all([
     probe("debug_traceBlockByNumber", receivedAtMs, mintedAtMs, () =>
       http.debugTraceBlockByNumber(
-        head.number as BlockNumber,
         {
-          tracer: "callTracer",
-          tracerConfig: { withLog: true },
-          timeout: `${Math.max(1, Math.floor(requestTimeoutMs / 1_000) - 1)}s`,
+          blockNumber: head.number as BlockNumber,
+          config: {
+            tracer: "callTracer",
+            tracerConfig: { withLog: true },
+            timeout: `${Math.max(1, Math.floor(requestTimeoutMs / 1_000) - 1)}s`,
+          },
         },
         { timeoutMs: requestTimeoutMs },
       ),

@@ -8,7 +8,7 @@ export type EthGetBlockByNumberParameters<full extends boolean = false> = {
   /** Hex-encoded number of the block to retrieve. */
   blockNumber: BlockNumber;
   /** Return full transactions when true, otherwise transaction hashes. */
-  includeTransactions?: full;
+  includeTransactions?: full | undefined;
 };
 
 type EthGetBlockByNumber<full extends boolean> = RpcMethodDefinition<

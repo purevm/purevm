@@ -4,16 +4,25 @@ import type { BlockHash } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 import type { TraceCallManyEntry, TraceReplayResult } from "./types.js";
 
+export type TraceCallManyByHashParameters = {
+  /** Hash of the target block. */
+  blockHash: BlockHash;
+  /** Calls executed in sequence, each with its own trace kinds. */
+  calls: readonly TraceCallManyEntry[];
+};
+
 type Method = RpcMethodDefinition<
   "trace_callMany",
   readonly [readonly TraceCallManyEntry[], BlockHash],
-  TraceReplayResult[]
+  readonly TraceReplayResult[]
 >;
 export function traceCallManyByHash(
   client: RpcRequester<HttpRequestOptions>,
-  calls: readonly TraceCallManyEntry[],
-  blockHash: BlockHash,
+  parameters: TraceCallManyByHashParameters,
   options?: HttpRequestOptions,
-): Promise<TraceReplayResult[]> {
-  return client.request<Method>({ method: "trace_callMany", params: [calls, blockHash] }, options);
+): Promise<readonly TraceReplayResult[]> {
+  return client.request<Method>(
+    { method: "trace_callMany", params: [parameters.calls, parameters.blockHash] },
+    options,
+  );
 }

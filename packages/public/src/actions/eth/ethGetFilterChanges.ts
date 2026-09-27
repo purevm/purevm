@@ -4,18 +4,28 @@ import type { Hash, Quantity } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 import type { RpcLog } from "./types.js";
 
-type FilterResult = Hash | RpcLog;
-type Method<result extends FilterResult> = RpcMethodDefinition<
+export type EthGetFilterChangesParameters = {
+  /** Identifier returned by `eth_newFilter`, `eth_newBlockFilter`, or `eth_newPendingTransactionFilter`. */
+  filterId: Quantity;
+};
+
+/** Block or transaction hashes for hash filters, logs for log filters. */
+export type FilterChange = Hash | RpcLog;
+type Method<result extends FilterChange> = RpcMethodDefinition<
   "eth_getFilterChanges",
   readonly [Quantity],
-  result[]
+  readonly result[]
 >;
 export function ethGetFilterChanges<
-  result extends FilterResult = RpcLog,
+  result extends FilterChange = RpcLog,
   options extends RequestOptions = RequestOptions,
->(client: RpcRequester<options>, filterId: Quantity, requestOptions?: options): Promise<result[]> {
+>(
+  client: RpcRequester<options>,
+  parameters: EthGetFilterChangesParameters,
+  requestOptions?: options,
+): Promise<readonly result[]> {
   return client.request<Method<result>>(
-    { method: "eth_getFilterChanges", params: [filterId] },
+    { method: "eth_getFilterChanges", params: [parameters.filterId] },
     requestOptions,
   );
 }

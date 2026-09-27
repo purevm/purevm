@@ -4,19 +4,25 @@ import type { BlockNumber } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 import type { TraceCallManyEntry, TraceReplayResult } from "./types.js";
 
+export type TraceCallManyByNumberParameters = {
+  /** Hex-encoded number of the target block. */
+  blockNumber: BlockNumber;
+  /** Calls executed in sequence, each with its own trace kinds. */
+  calls: readonly TraceCallManyEntry[];
+};
+
 type Method = RpcMethodDefinition<
   "trace_callMany",
   readonly [readonly TraceCallManyEntry[], BlockNumber],
-  TraceReplayResult[]
+  readonly TraceReplayResult[]
 >;
 export function traceCallManyByNumber(
   client: RpcRequester<HttpRequestOptions>,
-  calls: readonly TraceCallManyEntry[],
-  blockNumber: BlockNumber,
+  parameters: TraceCallManyByNumberParameters,
   options?: HttpRequestOptions,
-): Promise<TraceReplayResult[]> {
+): Promise<readonly TraceReplayResult[]> {
   return client.request<Method>(
-    { method: "trace_callMany", params: [calls, blockNumber] },
+    { method: "trace_callMany", params: [parameters.calls, parameters.blockNumber] },
     options,
   );
 }

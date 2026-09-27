@@ -3,6 +3,11 @@ import type { RequestOptions } from "@purevm/transports";
 import type { BlockHash, Quantity } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 
+export type EthGetBlockTransactionCountByHashParameters = {
+  /** Hash of the target block. */
+  blockHash: BlockHash;
+};
+
 type Method = RpcMethodDefinition<
   "eth_getBlockTransactionCountByHash",
   readonly [BlockHash],
@@ -10,11 +15,11 @@ type Method = RpcMethodDefinition<
 >;
 export function ethGetBlockTransactionCountByHash<options extends RequestOptions>(
   client: RpcRequester<options>,
-  blockHash: BlockHash,
+  parameters: EthGetBlockTransactionCountByHashParameters,
   requestOptions?: options,
 ): Promise<Quantity> {
   return client.request<Method>(
-    { method: "eth_getBlockTransactionCountByHash", params: [blockHash] },
+    { method: "eth_getBlockTransactionCountByHash", params: [parameters.blockHash] },
     requestOptions,
   );
 }

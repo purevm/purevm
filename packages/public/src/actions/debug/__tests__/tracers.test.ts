@@ -41,8 +41,8 @@ test.for([
 ] as const)("forwards tracer configuration %o unchanged", async ([config]) => {
   const { client, params } = recordingClient();
 
-  await client.debugTraceTransaction(hash, config);
-  await client.debugTraceBlockByNumber("0x10", config);
+  await client.debugTraceTransaction({ transactionHash: hash, config });
+  await client.debugTraceBlockByNumber({ blockNumber: "0x10", config });
 
   expect(params()).toEqual([
     [hash, config],
@@ -58,7 +58,7 @@ test("forwards debug_traceCall state and block overrides", async () => {
     tracer: "prestateTracer",
   } as const;
 
-  await client.debugTraceCallByTag(call, "latest", config);
+  await client.debugTraceCallByTag({ call, blockTag: "latest", config });
 
   expect(params()).toEqual([[call, "latest", config]]);
 });
@@ -66,7 +66,7 @@ test("forwards debug_traceCall state and block overrides", async () => {
 test("defaults to callTracer", async () => {
   const { client, params } = recordingClient();
 
-  await client.debugTraceCallByHash(call, hash);
+  await client.debugTraceCallByHash({ call, blockHash: hash });
 
   expect(params()).toEqual([[call, hash, { tracer: "callTracer" }]]);
 });
@@ -74,42 +74,53 @@ test("defaults to callTracer", async () => {
 test("infers the result type from the tracer", () => {
   const client = createHttpClient({ url: "https://rpc.example.com" });
 
-  expectTypeOf(client.debugTraceTransaction(hash)).resolves.toEqualTypeOf<DebugCallFrame>();
   expectTypeOf(
-    client.debugTraceTransaction(hash, { tracer: "flatCallTracer" }),
-  ).resolves.toEqualTypeOf<TraceEntry[]>();
+    client.debugTraceTransaction({ transactionHash: hash }),
+  ).resolves.toEqualTypeOf<DebugCallFrame>();
   expectTypeOf(
-    client.debugTraceTransaction(hash, { tracer: "prestateTracer" }),
+    client.debugTraceTransaction({ transactionHash: hash, config: { tracer: "flatCallTracer" } }),
+  ).resolves.toEqualTypeOf<readonly TraceEntry[]>();
+  expectTypeOf(
+    client.debugTraceTransaction({ transactionHash: hash, config: { tracer: "prestateTracer" } }),
   ).resolves.toEqualTypeOf<DebugPrestate>();
   expectTypeOf(
-    client.debugTraceTransaction(hash, {
-      tracer: "prestateTracer",
-      tracerConfig: { diffMode: true },
+    client.debugTraceTransaction({
+      transactionHash: hash,
+      config: {
+        tracer: "prestateTracer",
+        tracerConfig: { diffMode: true },
+      },
     }),
   ).resolves.toEqualTypeOf<DebugPrestateDiff>();
   expectTypeOf(
-    client.debugTraceTransaction(hash, { tracer: "4byteTracer" }),
+    client.debugTraceTransaction({ transactionHash: hash, config: { tracer: "4byteTracer" } }),
   ).resolves.toEqualTypeOf<DebugFourByteResult>();
-  expectTypeOf(client.debugTraceTransaction(hash, { tracer: "noopTracer" })).resolves.toEqualTypeOf<
-    Record<string, never>
-  >();
   expectTypeOf(
-    client.debugTraceTransaction(hash, { enableMemory: true }),
+    client.debugTraceTransaction({ transactionHash: hash, config: { tracer: "noopTracer" } }),
+  ).resolves.toEqualTypeOf<Record<string, never>>();
+  expectTypeOf(
+    client.debugTraceTransaction({ transactionHash: hash, config: { enableMemory: true } }),
   ).resolves.toEqualTypeOf<DebugStructLogResult>();
   expectTypeOf(
-    client.debugTraceTransaction(hash, { tracer: "{ result() { return 1; }, fault() {} }" }),
+    client.debugTraceTransaction({
+      transactionHash: hash,
+      config: { tracer: "{ result() { return 1; }, fault() {} }" },
+    }),
   ).resolves.toBeUnknown();
   expectTypeOf(
-    client.debugTraceTransaction(hash, {
-      tracer: "muxTracer",
-      tracerConfig: { callTracer: {}, prestateTracer: { diffMode: true } },
+    client.debugTraceTransaction({
+      transactionHash: hash,
+      config: {
+        tracer: "muxTracer",
+        tracerConfig: { callTracer: {}, prestateTracer: { diffMode: true } },
+      },
     }),
   ).resolves.toEqualTypeOf<{ callTracer: DebugCallFrame; prestateTracer: DebugPrestateDiff }>();
   expectTypeOf(
-    client.debugTraceBlockByTag("latest", { tracer: "prestateTracer" }),
-  ).resolves.toEqualTypeOf<DebugBlockTrace<DebugPrestate>[]>();
+    client.debugTraceBlockByTag({ blockTag: "latest", config: { tracer: "prestateTracer" } }),
+  ).resolves.toEqualTypeOf<readonly DebugBlockTrace<DebugPrestate>[]>();
   expectTypeOf(
-    client.debugTraceCallByNumber(call, "0x10", { tracer: "4byteTracer" }),
+    client.debugTraceCallByNumber({ call, blockNumber: "0x10", config: { tracer: "4byteTracer" } }),
   ).resolves.toEqualTypeOf<DebugFourByteResult>();
 });
 

@@ -37,6 +37,31 @@ if (block) {
 `includeTransactions: true` returns `RpcTransaction[]`. Omitting it or passing `false` returns
 transaction hashes.
 
+### Calling Convention
+
+Every method that needs input takes a single parameters object, followed by optional request
+options. Methods without input take only the request options:
+
+```ts
+import { createHttpClient } from "@purevm/public";
+
+const client = createHttpClient({ url: "https://ethereum-rpc.publicnode.com" });
+
+await client.ethChainId();
+await client.ethGetTransactionByBlockTagAndIndex({ blockTag: "latest", index: "0x0" });
+await client.traceCallByNumber(
+  {
+    blockNumber: "0x10",
+    call: { to: "0x0000000000000000000000000000000000000001" },
+    traceTypes: ["trace"],
+  },
+  { timeoutMs: 5_000 },
+);
+```
+
+Field names describe the value, not its position: `blockHash`, `blockNumber`, `blockTag`,
+`transactionHash`, `index`, `filterId`, `call`, `traceTypes`, and so on.
+
 ### Block Selection
 
 A method whose JSON-RPC call targets a block exists once per selector the node API accepts, and its
@@ -178,6 +203,27 @@ methods that mutate node state or write trace data to the node filesystem.
 trace module and require a compatible node with tracing enabled. `trace_*ByHash` variants need
 Erigon, Reth, or Nethermind; historical Parity nodes only accept numbers and tags.
 
+### Chain-Specific Transactions
+
+`RpcTransaction` covers the Ethereum envelopes (`0x0` to `0x4`), OP Stack deposits (`0x7e`, as
+`RpcTransactionOpDeposit`), and any other type as `RpcTransactionUnknown`, which keeps every field
+the node returns. Narrowing on a known type stays exact:
+
+```ts
+import type { RpcTransaction } from "@purevm/public";
+
+function describe(transaction: RpcTransaction): string {
+  if (transaction.type === "0x2") return `EIP-1559, max fee ${transaction.maxFeePerGas}`;
+  if (transaction.type === "0x7e") return `OP deposit with source ${transaction.sourceHash}`;
+  if (String(transaction.type) === "0x6a") return "Arbitrum internal transaction";
+  return `type ${transaction.type}`;
+}
+```
+
+Receipts expose the OP Stack L1 fee fields (`l1Fee`, `l1GasUsed`, `l1BaseFeeScalar`, and more) and
+the Arbitrum fields (`gasUsedForL1`, `l1BlockNumber`) as optional properties. Blocks expose the
+Arbitrum `l1BlockNumber`, `sendCount`, and `sendRoot`.
+
 ### Call Overrides
 
 `ethCallBy*` and `ethEstimateGasBy*` accept `stateOverrides`, keyed by address, to replace an
@@ -215,7 +261,9 @@ import { createHttpClient } from "@purevm/public";
 const client = createHttpClient({ url: "http://localhost:8545" });
 
 const { pending, queued } = await client.txpoolStatus();
-const content = await client.txpoolContentFrom("0x0000000000000000000000000000000000000001");
+const content = await client.txpoolContentFrom({
+  address: "0x0000000000000000000000000000000000000001",
+});
 for (const [nonce, transaction] of Object.entries(content.pending)) {
   console.log(nonce, transaction.hash);
 }
@@ -227,8 +275,7 @@ it usually requires your own node.
 
 ### Debug Tracers
 
-Every `debug_trace*` method takes an optional tracer configuration as its last argument before the
-request options. It defaults to `callTracer`, and the result type follows the selected tracer:
+Every `debug_trace*` method takes an optional tracer configuration in its `config` field. It defaults to `callTracer`, and the result type follows the selected tracer:
 
 | Configuration                                                    | Result                                 |
 | ---------------------------------------------------------------- | -------------------------------------- |
@@ -250,15 +297,18 @@ import { createHttpClient } from "@purevm/public";
 
 const client = createHttpClient({ url: "https://ethereum-rpc.publicnode.com" });
 
-const diff = await client.debugTraceTransaction(
-  "0x0000000000000000000000000000000000000000000000000000000000000000",
-  { tracer: "prestateTracer", tracerConfig: { diffMode: true } },
-);
+const diff = await client.debugTraceTransaction({
+  transactionHash: "0x0000000000000000000000000000000000000000000000000000000000000000",
+  config: { tracer: "prestateTracer", tracerConfig: { diffMode: true } },
+});
 console.log(diff.pre, diff.post);
 
-const traces = await client.debugTraceBlockByTag("latest", {
-  tracer: "4byteTracer",
-  timeout: "5s",
+const traces = await client.debugTraceBlockByTag({
+  blockTag: "latest",
+  config: {
+    tracer: "4byteTracer",
+    timeout: "5s",
+  },
 });
 for (const trace of traces) {
   if (trace.result === undefined) console.error(trace.txHash, trace.error);
@@ -357,12 +407,21 @@ All transport errors, constants, and retry helpers from `@purevm/transports` are
 pnpm check
 pnpm test
 pnpm test:coverage
+pnpm test:integ
 pnpm build
 pnpm pack:check
 ```
 
-Unit and integration tests use Vitest. Integration tests use local services and require no public
-RPC endpoint.
+`pnpm test` runs the unit tests (`src/**/__tests__/*.test.ts`). They use fake timers and fake
+`fetch` and WebSocket implementations, so they never touch the network.
+
+`pnpm test:integ` runs the integration tests (`src/**/__tests__/*.integ.ts`) against a real node.
+They need `BASE_HTTP_URL`, a Base mainnet endpoint with the `trace_*` and `debug_*` namespaces
+enabled, read from the monorepo root `.env` or the environment. The header of
+`src/clients/__tests__/http-client.integ.ts` documents every requirement.
+
+`scripts/newHeadsAvailability.ts` measures how quickly `newHeads` notifications become readable
+over HTTP. It needs `BASE_HTTP_URL` and `BASE_WS_URL`: run it with `pnpm tsx scripts/newHeadsAvailability.ts`.
 
 ## License
 

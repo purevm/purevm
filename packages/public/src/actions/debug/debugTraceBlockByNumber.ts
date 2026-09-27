@@ -10,21 +10,31 @@ import type {
   DebugTraceResult,
 } from "./types.js";
 
+export type DebugTraceBlockByNumberParameters<config extends DebugTraceConfig = CallTracerConfig> =
+  {
+    /** Hex-encoded number of the target block. */
+    blockNumber: BlockNumber;
+    /** Tracer configuration. Defaults to `callTracer`. */
+    config?: config | undefined;
+  };
+
 /** Traces every transaction of the block with this number. The result type follows `config.tracer`, which defaults to `callTracer`. */
 export function debugTraceBlockByNumber<const config extends DebugTraceConfig = CallTracerConfig>(
   client: RpcRequester<HttpRequestOptions>,
-  blockNumber: BlockNumber,
-  config?: config,
+  parameters: DebugTraceBlockByNumberParameters<config>,
   options?: HttpRequestOptions,
-): Promise<DebugBlockTrace<DebugTraceResult<config>>[]> {
+): Promise<readonly DebugBlockTrace<DebugTraceResult<config>>[]> {
   return client.request<
     RpcMethodDefinition<
       "debug_traceBlockByNumber",
       readonly [BlockNumber, DebugTraceConfig],
-      DebugBlockTrace<DebugTraceResult<config>>[]
+      readonly DebugBlockTrace<DebugTraceResult<config>>[]
     >
   >(
-    { method: "debug_traceBlockByNumber", params: [blockNumber, config ?? DEFAULT_TRACER] },
+    {
+      method: "debug_traceBlockByNumber",
+      params: [parameters.blockNumber, parameters.config ?? DEFAULT_TRACER],
+    },
     options,
   );
 }

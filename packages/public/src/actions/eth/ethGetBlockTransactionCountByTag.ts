@@ -3,6 +3,11 @@ import type { RequestOptions } from "@purevm/transports";
 import type { BlockTag, Quantity } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 
+export type EthGetBlockTransactionCountByTagParameters = {
+  /** Named target block, such as `latest` or `finalized`. */
+  blockTag: BlockTag;
+};
+
 type Method = RpcMethodDefinition<
   "eth_getBlockTransactionCountByNumber",
   readonly [BlockTag],
@@ -10,11 +15,11 @@ type Method = RpcMethodDefinition<
 >;
 export function ethGetBlockTransactionCountByTag<options extends RequestOptions>(
   client: RpcRequester<options>,
-  blockTag: BlockTag,
+  parameters: EthGetBlockTransactionCountByTagParameters,
   requestOptions?: options,
 ): Promise<Quantity> {
   return client.request<Method>(
-    { method: "eth_getBlockTransactionCountByNumber", params: [blockTag] },
+    { method: "eth_getBlockTransactionCountByNumber", params: [parameters.blockTag] },
     requestOptions,
   );
 }

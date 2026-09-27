@@ -3,13 +3,21 @@ import type { HttpRequestOptions } from "@purevm/transports";
 import type { BlockTag, Hex } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 
-type Method = RpcMethodDefinition<"debug_getRawReceipts", readonly [BlockTag], Hex[]>;
+export type DebugGetRawReceiptsByTagParameters = {
+  /** Named target block, such as `latest` or `finalized`. */
+  blockTag: BlockTag;
+};
+
+type Method = RpcMethodDefinition<"debug_getRawReceipts", readonly [BlockTag], readonly Hex[]>;
 
 /** Returns the EIP-2718 encoded receipts of the block. */
 export function debugGetRawReceiptsByTag(
   client: RpcRequester<HttpRequestOptions>,
-  blockTag: BlockTag,
+  parameters: DebugGetRawReceiptsByTagParameters,
   options?: HttpRequestOptions,
-): Promise<Hex[]> {
-  return client.request<Method>({ method: "debug_getRawReceipts", params: [blockTag] }, options);
+): Promise<readonly Hex[]> {
+  return client.request<Method>(
+    { method: "debug_getRawReceipts", params: [parameters.blockTag] },
+    options,
+  );
 }

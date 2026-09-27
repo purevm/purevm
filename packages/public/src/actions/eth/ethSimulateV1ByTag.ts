@@ -14,14 +14,14 @@ export type EthSimulateV1ByTagParameters = {
 type Method = RpcMethodDefinition<
   "eth_simulateV1",
   readonly [EthSimulatePayload, BlockTag],
-  RpcSimulatedBlock[]
+  readonly RpcSimulatedBlock[]
 >;
 
 export function ethSimulateV1ByTag<options extends RequestOptions>(
   client: RpcRequester<options>,
   parameters: EthSimulateV1ByTagParameters,
   requestOptions?: options,
-): Promise<RpcSimulatedBlock[]> {
+): Promise<readonly RpcSimulatedBlock[]> {
   return client.request<Method>(
     { method: "eth_simulateV1", params: [parameters.payload, parameters.blockTag] },
     requestOptions,

@@ -15,19 +15,20 @@ export default defineConfig({
       reportsDirectory: "coverage",
       thresholds: { branches: 80, functions: 90, lines: 90, statements: 90 },
     },
-    exclude: ["tests/e2e/**"],
     projects: [
       {
         test: {
           name: "unit",
           include: ["src/**/__tests__/*.test.ts"],
-          exclude: ["**/*.integration.test.ts"],
+          setupFiles: ["./vitest.setup.ts"],
         },
       },
       {
         test: {
           name: "integration",
-          include: ["src/**/__tests__/*.integration.test.ts"],
+          include: ["src/**/__tests__/*.integ.ts"],
+          setupFiles: ["./vitest.integ.setup.ts"],
+          testTimeout: 180_000,
         },
       },
     ],

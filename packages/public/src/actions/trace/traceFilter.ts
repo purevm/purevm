@@ -6,29 +6,29 @@ import type { TraceEntry } from "./types.js";
 
 export type TraceFilterParameters = {
   /** Number of matching traces to skip. */
-  after?: number;
+  after?: number | undefined;
   /** Maximum number of matching traces to return. */
-  count?: number;
+  count?: number | undefined;
   /** Include traces initiated by any of these addresses. */
-  fromAddress?: readonly Address[];
+  fromAddress?: readonly Address[] | undefined;
   /** Inclusive first block of the search range. */
-  fromBlock?: BlockNumberOrTag;
+  fromBlock?: BlockNumberOrTag | undefined;
   /** Include traces targeting any of these addresses. */
-  toAddress?: readonly Address[];
+  toAddress?: readonly Address[] | undefined;
   /** Inclusive final block of the search range. */
-  toBlock?: BlockNumberOrTag;
+  toBlock?: BlockNumberOrTag | undefined;
 };
 
 type TraceFilter = RpcMethodDefinition<
   "trace_filter",
   readonly [TraceFilterParameters],
-  TraceEntry[]
+  readonly TraceEntry[]
 >;
 
 export function traceFilter(
   client: RpcRequester<HttpRequestOptions>,
   filter: TraceFilterParameters,
   options?: HttpRequestOptions,
-): Promise<TraceEntry[]> {
+): Promise<readonly TraceEntry[]> {
   return client.request<TraceFilter>({ method: "trace_filter", params: [filter] }, options);
 }

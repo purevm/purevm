@@ -14,14 +14,14 @@ export type EthSimulateV1ByNumberParameters = {
 type Method = RpcMethodDefinition<
   "eth_simulateV1",
   readonly [EthSimulatePayload, BlockNumber],
-  RpcSimulatedBlock[]
+  readonly RpcSimulatedBlock[]
 >;
 
 export function ethSimulateV1ByNumber<options extends RequestOptions>(
   client: RpcRequester<options>,
   parameters: EthSimulateV1ByNumberParameters,
   requestOptions?: options,
-): Promise<RpcSimulatedBlock[]> {
+): Promise<readonly RpcSimulatedBlock[]> {
   return client.request<Method>(
     { method: "eth_simulateV1", params: [parameters.payload, parameters.blockNumber] },
     requestOptions,

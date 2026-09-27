@@ -4,19 +4,24 @@ import type { BlockTag } from "../../types/primitives.js";
 import type { RpcMethodDefinition, RpcRequester } from "../../types/rpc.js";
 import type { RpcTransactionReceipt } from "./types.js";
 
+export type EthGetBlockReceiptsByTagParameters = {
+  /** Named target block, such as `latest` or `finalized`. */
+  blockTag: BlockTag;
+};
+
 type EthGetBlockReceiptsByTag = RpcMethodDefinition<
   "eth_getBlockReceipts",
   readonly [BlockTag],
-  RpcTransactionReceipt[] | null
+  readonly RpcTransactionReceipt[] | null
 >;
 
 export function ethGetBlockReceiptsByTag<options extends RequestOptions>(
   client: RpcRequester<options>,
-  blockTag: BlockTag,
+  parameters: EthGetBlockReceiptsByTagParameters,
   requestOptions?: options,
-): Promise<RpcTransactionReceipt[] | null> {
+): Promise<readonly RpcTransactionReceipt[] | null> {
   return client.request<EthGetBlockReceiptsByTag>(
-    { method: "eth_getBlockReceipts", params: [blockTag] },
+    { method: "eth_getBlockReceipts", params: [parameters.blockTag] },
     requestOptions,
   );
 }

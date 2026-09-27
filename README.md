@@ -21,9 +21,8 @@ pnpm add @purevm/public
 
 ```bash
 pnpm install
-pnpm build
-pnpm test
-pnpm validate
+pnpm --filter @purevm/transports validate
+pnpm --filter @purevm/public validate
 ```
 
 Formatting and linting are configured once at the root (`.oxfmtrc.json`, `.oxlintrc.json`) and run

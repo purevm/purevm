@@ -57,9 +57,10 @@
         "lint:fix": "oxlint --fix --deny-warnings --report-unused-disable-directives .",
         "pack:check": "pnpm build && npm pack --dry-run --ignore-scripts",
         "prepack": "pnpm build",
-        "test": "vitest run",
-        "test:coverage": "vitest run --coverage",
-        "test:watch": "vitest",
+        "test": "vitest run --project unit",
+        "test:integ": "vitest run --project integration",
+        "test:coverage": "vitest run --project unit --coverage",
+        "test:watch": "vitest --project unit",
         "typecheck": "tsc --noEmit",
         "validate": "pnpm check && pnpm test && pnpm build"
     },
