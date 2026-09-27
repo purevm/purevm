@@ -174,6 +174,31 @@ methods that mutate node state or write trace data to the node filesystem.
 trace module and require a compatible node with tracing enabled. `trace_*ByHash` variants need
 Erigon, Reth, or Nethermind; historical Parity nodes only accept numbers and tags.
 
+### Call Overrides
+
+`ethCallBy*` and `ethEstimateGasBy*` accept `stateOverrides`, keyed by address, to replace an
+account's `balance`, `nonce`, `code`, full `state`, or individual `stateDiff` slots before execution.
+`ethCallBy*` also accepts `blockOverrides` (`number`, `time`, `gasLimit`, `baseFeePerGas`, and more).
+Overrides are only sent when provided, so calls without them stay compatible with every node.
+
+```ts
+import { createHttpClient } from "@purevm/public";
+
+const client = createHttpClient({ url: "https://ethereum-rpc.publicnode.com" });
+const token = "0x0000000000000000000000000000000000000001";
+
+const result = await client.ethCallByTag({
+  blockTag: "latest",
+  call: { data: "0x18160ddd", to: token },
+  stateOverrides: { [token]: { stateDiff: { "0x2": "0x64" } } },
+  blockOverrides: { time: "0x6553f100" },
+});
+```
+
+State overrides are supported by Geth, Reth, Erigon, Nethermind, and Besu. Block overrides on
+`eth_call` are supported by Geth and Reth. `eth_estimateGas` takes no block overrides because not
+every client accepts them.
+
 ### Debug Tracers
 
 Every `debug_trace*` method takes an optional tracer configuration as its last argument before the
