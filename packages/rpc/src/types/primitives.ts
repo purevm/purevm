@@ -12,7 +12,6 @@ export type TransactionHash = Hash;
 export type Quantity = Hex;
 /** Collection position encoded as a JSON-RPC hex quantity. */
 export type Index = Quantity;
-
 /** Named execution-state position accepted by Ethereum JSON-RPC methods. */
 export type BlockTag = "earliest" | "finalized" | "latest" | "pending" | "safe";
 /** Execution block number encoded as a JSON-RPC hex quantity. */

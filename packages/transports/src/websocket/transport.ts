@@ -2,27 +2,47 @@ import { resolveTimeout } from "../common/options.js";
 import { createRequestIdGenerator } from "../common/request-id.js";
 import { resolveRetry, withRetry } from "../common/retry.js";
 import { parseRpcResponse } from "../common/rpc.js";
-import { RpcSerializationError, WebSocketStoppedError } from "../errors/index.js";
+import {
+  RpcAbortError,
+  RpcSerializationError,
+  RpcTimeoutError,
+  WebSocketStoppedError,
+} from "../errors/index.js";
 import type {
   JsonValue,
   RequestOptions,
   RpcCall,
   RpcMethod,
+  RpcId,
   RpcRequest,
   Transport,
 } from "../types.js";
 import { WebSocketConnection } from "./connection.js";
+import { Heartbeat, resolveHeartbeat } from "./heartbeat.js";
+import { LateSubscriptions } from "./late-subscriptions.js";
 import { parseWebSocketMessage } from "./message.js";
 import { PendingRequests } from "./pending.js";
+import { resolveReconnect, type ResolvedReconnectOptions } from "./reconnect.js";
 import { defaultWebSocketFactory } from "./socket.js";
 import { SubscriptionManager } from "./subscriber.js";
-import type { RpcSubscription, SubscribeOptions, WebSocketTransportOptions } from "./types.js";
+import type {
+  HeartbeatMethod,
+  RpcSubscription,
+  SubscribeOptions,
+  WebSocketTransportOptions,
+} from "./types.js";
 import { parseWebSocketUrl } from "./url.js";
 
 type SubscribeMethod = {
   method: "eth_subscribe";
   params: readonly JsonValue[];
   result: string;
+};
+
+type HeartbeatCall = {
+  method: HeartbeatMethod;
+  params?: undefined;
+  result: unknown;
 };
 
 type UnsubscribeMethod = {
@@ -37,23 +57,31 @@ export class WebSocketTransport implements Transport {
   private readonly options: WebSocketTransportOptions;
   private readonly connection: WebSocketConnection;
   private readonly pending = new PendingRequests();
+  private readonly lateSubscriptions = new LateSubscriptions();
   private readonly subscriber: SubscriptionManager;
   private readonly nextId = createRequestIdGenerator();
+  private readonly reconnect: false | ResolvedReconnectOptions;
+  private readonly reconnectAbort = new AbortController();
+  private readonly heartbeat?: Heartbeat;
   private reconnecting?: Promise<void>;
   private reconnectRequested = false;
   private stopped = false;
 
   constructor(options: WebSocketTransportOptions) {
     this.url = parseWebSocketUrl(options.url);
+    this.reconnect = resolveReconnect(options.reconnect);
+    const heartbeat = resolveHeartbeat(options.heartbeat);
     this.options = options;
     this.connection = new WebSocketConnection(
       this.url,
       options.createWebSocket ?? defaultWebSocketFactory,
       {
+        onOpen: () => this.heartbeat?.start(),
         onMessage: (data) => this.handleMessage(data),
         onError: (error) => this.report(error),
         onClose: (error) => this.handleClose(error),
       },
+      resolveTimeout(options, {}),
     );
     this.subscriber = new SubscriptionManager(
       (params, requestOptions) =>
@@ -65,6 +93,16 @@ export class WebSocketTransport implements Transport {
         ),
       (error) => this.report(error),
     );
+    if (heartbeat !== false) {
+      this.heartbeat = new Heartbeat(
+        heartbeat,
+        (method, timeoutMs) => this.request<HeartbeatCall>({ method }, { retry: false, timeoutMs }),
+        (error) => {
+          this.report(error);
+          this.connection.drop(error);
+        },
+      );
+    }
   }
 
   get connected(): boolean {
@@ -75,6 +113,8 @@ export class WebSocketTransport implements Transport {
     if (this.stopped) throw new WebSocketStoppedError();
     const timeoutMs = resolveTimeout(this.options, options);
     await this.connection.connect(timeoutMs, options.signal);
+    // Any successful connection restores subscriptions left unbound by a drop.
+    if (!this.reconnecting && this.subscriber.hasUnbound) this.restoreSubscriptions(false);
   }
 
   async request<method extends RpcMethod>(
@@ -101,6 +141,9 @@ export class WebSocketTransport implements Transport {
   close(): void {
     if (this.stopped) return;
     this.stopped = true;
+    this.reconnectAbort.abort();
+    this.heartbeat?.stop();
+    this.lateSubscriptions.clear();
     this.pending.rejectAll(new WebSocketStoppedError());
     this.subscriber.disconnected();
     this.connection.close();
@@ -126,10 +169,22 @@ export class WebSocketTransport implements Transport {
     } catch (cause) {
       this.pending.reject(request.id, cause);
     }
-    return (await response) as method["result"];
+    try {
+      return (await response) as method["result"];
+    } catch (error) {
+      // The provider may still create the subscription after the caller gave up.
+      if (
+        call.method === "eth_subscribe" &&
+        (error instanceof RpcTimeoutError || error instanceof RpcAbortError)
+      ) {
+        this.lateSubscriptions.track(request.id);
+      }
+      throw error;
+    }
   }
 
   private handleMessage(data: unknown): void {
+    this.heartbeat?.touch();
     try {
       const message = parseWebSocketMessage(data);
       if (message.type === "subscription") {
@@ -137,7 +192,12 @@ export class WebSocketTransport implements Transport {
         return;
       }
 
-      if (!this.pending.has(message.id)) return;
+      if (!this.pending.has(message.id)) {
+        if (this.lateSubscriptions.take(message.id)) {
+          this.releaseLateSubscription(message.response, message.id);
+        }
+        return;
+      }
       try {
         this.pending.resolve(message.id, parseRpcResponse(message.response, message.id));
       } catch (error) {
@@ -148,28 +208,66 @@ export class WebSocketTransport implements Transport {
     }
   }
 
-  private handleClose(error: Error): void {
-    this.pending.rejectAll(error);
-    this.subscriber.disconnected();
-    if (this.stopped || this.subscriber.size === 0) return;
-    if (this.reconnecting) this.reconnectRequested = true;
-    else this.scheduleReconnect();
+  private releaseLateSubscription(response: unknown, requestId: RpcId): void {
+    let id: unknown;
+    try {
+      id = parseRpcResponse(response, requestId);
+    } catch {
+      return;
+    }
+    if (typeof id !== "string") return;
+    this.request<UnsubscribeMethod>(
+      { method: "eth_unsubscribe", params: [id] },
+      { retry: false },
+    ).catch(() => undefined);
   }
 
-  private scheduleReconnect(): void {
+  private handleClose(error: Error): void {
+    this.heartbeat?.stop();
+    // Server-side subscriptions die with the socket.
+    this.lateSubscriptions.clear();
+    this.pending.rejectAll(error);
+    this.subscriber.disconnected();
+    if (this.stopped || this.reconnect === false || this.subscriber.size === 0) return;
+    if (this.reconnecting) this.reconnectRequested = true;
+    else this.restoreSubscriptions(true);
+  }
+
+  /**
+   * Reconnects when needed and resubscribes unbound subscriptions. A drop-triggered run follows
+   * the reconnect policy; a run triggered by an external connection makes a single attempt.
+   */
+  private restoreSubscriptions(afterDrop: boolean): void {
     if (this.reconnecting || this.stopped) return;
-    const retry = resolveRetry(this.options, {});
-    const reconnectRetry = retry === false ? false : { ...retry, shouldRetry: () => true };
-    const reconnecting = withRetry(async () => {
-      await this.connect();
-      await this.subscriber.restore();
-    }, reconnectRetry)
-      .catch((error: unknown) => this.report(normalizeError(error)))
+    const policy = afterDrop && this.reconnect !== false ? this.reconnect : undefined;
+    const retry = {
+      retries: policy?.retries ?? 0,
+      delayMs: policy?.delayMs ?? 0,
+      maxDelayMs: policy?.maxDelayMs ?? 0,
+      factor: policy?.factor ?? 1,
+      shouldRetry: (error: unknown) => {
+        if (this.stopped) return false;
+        this.report(normalizeError(error));
+        return true;
+      },
+    };
+    const reconnecting = withRetry(
+      async () => {
+        const timeoutMs = resolveTimeout(this.options, {});
+        await this.connection.connect(timeoutMs, this.reconnectAbort.signal);
+        await this.subscriber.restore();
+      },
+      retry,
+      this.reconnectAbort.signal,
+    )
+      .catch((error: unknown) => {
+        if (!this.stopped) this.report(normalizeError(error));
+      })
       .finally(() => {
         if (this.reconnecting === reconnecting) this.reconnecting = undefined;
         if (this.reconnectRequested && !this.stopped && this.subscriber.size > 0) {
           this.reconnectRequested = false;
-          this.scheduleReconnect();
+          this.restoreSubscriptions(true);
         }
       });
     this.reconnecting = reconnecting;

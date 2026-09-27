@@ -45,3 +45,7 @@ test("preserves the raw invalid message", () => {
     expect.objectContaining({ code: "WEBSOCKET_PROTOCOL", raw: "{" }),
   );
 });
+
+test("rejects Blob messages", () => {
+  expect(() => parseWebSocketMessage(new Blob(["{}"]))).toThrow(/Blob WebSocket messages/);
+});

@@ -1,3 +1,6 @@
 packages:
   - "packages/*"
   - "!packages/__backup__"
+
+onlyBuiltDependencies:
+  - esbuild

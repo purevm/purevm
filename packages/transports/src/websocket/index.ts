@@ -1,5 +1,8 @@
 export { WebSocketTransport } from "./transport.js";
 export type {
+  HeartbeatMethod,
+  HeartbeatOptions,
+  ReconnectOptions,
   RpcSubscription,
   SubscribeOptions,
   WebSocketEvent,

@@ -34,6 +34,15 @@ export class Subscriptions {
     for (const record of this.records) record.id = undefined;
   }
 
+  has(record: SubscriptionRecord): boolean {
+    return this.records.has(record);
+  }
+
+  hasUnbound(): boolean {
+    for (const record of this.records) if (!record.id) return true;
+    return false;
+  }
+
   get(id: string): SubscriptionRecord | undefined {
     return this.byId.get(id);
   }

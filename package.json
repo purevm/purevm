@@ -4,17 +4,20 @@
     "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM blockchains.",
     "scripts": {
         "build": "pnpm -r --if-present build",
-        "test": "pnpm -r --if-present test && pnpm test:new-heads && pnpm test:new-blocks && pnpm test:extensions",
+        "test": "pnpm -r --if-present test && pnpm test:new-heads && pnpm test:new-blocks && pnpm test:fetch-blocks && pnpm test:extensions",
         "test:extensions": "vitest run --config modules/extensions/vitest.config.mts",
         "test:extensions:coverage": "vitest run --config modules/extensions/vitest.config.mts --coverage",
         "test:new-heads": "vitest run --config modules/newHeads/vitest.config.mts",
         "test:new-heads:coverage": "vitest run --config modules/newHeads/vitest.config.mts --coverage",
         "test:new-blocks": "vitest run --config modules/newBlocks/vitest.config.mts",
         "test:new-blocks:coverage": "vitest run --config modules/newBlocks/vitest.config.mts --coverage",
-        "typecheck": "pnpm -r --if-present typecheck && pnpm typecheck:new-heads && pnpm typecheck:new-blocks && pnpm typecheck:extensions",
+        "test:fetch-blocks": "vitest run --config modules/fetchBlocks/vitest.config.mts",
+        "test:fetch-blocks:coverage": "vitest run --config modules/fetchBlocks/vitest.config.mts --coverage",
+        "typecheck": "pnpm -r --if-present typecheck && pnpm typecheck:new-heads && pnpm typecheck:new-blocks && pnpm typecheck:fetch-blocks && pnpm typecheck:extensions",
         "typecheck:extensions": "tsc --noEmit -p modules/extensions/tsconfig.json",
         "typecheck:new-heads": "tsc --noEmit -p modules/newHeads/tsconfig.json",
         "typecheck:new-blocks": "tsc --noEmit -p modules/newBlocks/tsconfig.json",
+        "typecheck:fetch-blocks": "tsc --noEmit -p modules/fetchBlocks/tsconfig.json",
         "lint": "oxlint --deny-warnings --report-unused-disable-directives . && pnpm lint:variables",
         "lint:fix": "oxlint --fix --deny-warnings --report-unused-disable-directives .",
         "lint:variables": "node scripts/check-untyped-variables.mjs .",
@@ -41,10 +44,5 @@
         "typescript": "^7.0.2",
         "vitest": "^4.1.11"
     },
-    "packageManager": "pnpm@10.34.5",
-    "pnpm": {
-        "onlyBuiltDependencies": [
-            "esbuild"
-        ]
-    }
+    "packageManager": "pnpm@10.34.5"
 }

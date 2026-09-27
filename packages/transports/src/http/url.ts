@@ -25,6 +25,8 @@ export function parseHttpUrl(value: string): ParsedHttpUrl {
 }
 
 function encodeBase64(value: string): string {
-  const browser = (globalThis as { btoa?: (input: string) => string }).btoa;
-  return browser ? browser(value) : Buffer.from(value, "utf8").toString("base64");
+  // btoa only accepts Latin-1, so encode UTF-8 bytes first.
+  let binary = "";
+  for (const byte of new TextEncoder().encode(value)) binary += String.fromCharCode(byte);
+  return btoa(binary);
 }

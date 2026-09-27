@@ -14,6 +14,8 @@ export async function openWebSocket(
   } catch (cause) {
     throw new WebSocketConnectionError(undefined, cause);
   }
+  // Blob payloads decode asynchronously and would reorder messages.
+  if ("binaryType" in socket) socket.binaryType = "arraybuffer";
   const timeout = createTimeoutContext(timeoutMs, signal);
 
   try {

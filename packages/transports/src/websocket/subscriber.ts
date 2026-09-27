@@ -67,6 +67,10 @@ export class SubscriptionManager {
     }
   }
 
+  get hasUnbound(): boolean {
+    return this.subscriptions.hasUnbound();
+  }
+
   disconnected(): void {
     this.subscriptions.unbindAll();
   }
@@ -74,10 +78,15 @@ export class SubscriptionManager {
   async restore(): Promise<void> {
     let firstError: Error | undefined;
     for (const record of this.subscriptions.values()) {
-      if (record.id) continue;
+      if (record.id || !this.subscriptions.has(record)) continue;
       try {
         const id = await this.subscribeRequest(record.params);
         if (typeof id !== "string") throw new RpcSubscriptionError("Invalid subscription id.", id);
+        // Unsubscribed or restored elsewhere while the request was in flight.
+        if (!this.subscriptions.has(record) || record.id) {
+          this.unsubscribeRequest(id).catch(() => undefined);
+          continue;
+        }
         this.subscriptions.bind(record, id);
       } catch (error) {
         const normalized = normalizeError(error);

@@ -10,6 +10,15 @@ test("normalizes HTTP URLs and extracts basic authorization", () => {
   });
 });
 
+test("encodes non-Latin-1 credentials as UTF-8", () => {
+  const { authorization } = parseHttpUrl("https://%C3%A9l%C3%A8ve:m%C3%B8t@rpc.example.com");
+  const encoded = authorization?.replace("Basic ", "") ?? "";
+
+  expect(new TextDecoder().decode(Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0)))).toBe(
+    "élève:møt",
+  );
+});
+
 test.each(["ws://rpc.example.com", "file:///tmp/rpc", " https://rpc.example.com"])(
   "rejects invalid HTTP URL %s",
   (url) => {

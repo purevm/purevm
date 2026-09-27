@@ -28,6 +28,7 @@ be supplied when a runtime does not provide them.
 - Typed transport, network, provider, timeout, and protocol errors
 - WebSocket subscriptions with unsubscribe support
 - Automatic WebSocket reconnect and subscription restoration
+- Idle WebSocket heartbeat that detects half-open connections
 - No runtime dependencies
 
 ### Scope
@@ -48,6 +49,8 @@ Higher-level RPC packages can define method types and pass them to these transpo
 | [`RpcCall`](#typed-methods)                   | Derives the call shape for an `RpcMethod`.               |
 | [`RequestOptions`](#request-options)          | Configures one request.                                  |
 | [`RetryOptions`](#retry-options)              | Configures retry count, delay, backoff, and filtering.   |
+| [`ReconnectOptions`](#reconnect-options)      | Configures WebSocket reconnection backoff.               |
+| [`HeartbeatOptions`](#heartbeat-options)      | Configures the WebSocket liveness probe.                 |
 | [`RpcSubscription`](#websocket-subscriptions) | Represents an active WebSocket subscription.             |
 | [`TransportError`](#errors)                   | Base class for package errors.                           |
 | [`isRetryableError`](#errors)                 | Reports whether an error is a retryable transport error. |
@@ -372,13 +375,49 @@ console.log(transport.connected);
 
 #### WebSocket Transport Options
 
-| Option            | Type                     | Required | Description                                                    |
-| ----------------- | ------------------------ | -------- | -------------------------------------------------------------- |
-| `url`             | `string`                 | Yes      | Endpoint using `ws:` or `wss:`.                                |
-| `createWebSocket` | `WebSocketFactory`       | No       | Custom WebSocket factory.                                      |
-| `onError`         | `(error: Error) => void` | No       | Reports unsolicited protocol and subscription callback errors. |
-| `timeoutMs`       | `number`                 | No       | Connection and request timeout.                                |
-| `retry`           | `false \| RetryOptions`  | No       | Request and reconnect policy.                                  |
+| Option            | Type                        | Required | Description                                                    |
+| ----------------- | --------------------------- | -------- | -------------------------------------------------------------- |
+| `url`             | `string`                    | Yes      | Endpoint using `ws:` or `wss:`.                                |
+| `createWebSocket` | `WebSocketFactory`          | No       | Custom WebSocket factory.                                      |
+| `onError`         | `(error: Error) => void`    | No       | Reports unsolicited protocol and subscription callback errors. |
+| `timeoutMs`       | `number`                    | No       | Connection and request timeout.                                |
+| `retry`           | `false \| RetryOptions`     | No       | Request retry policy.                                          |
+| `reconnect`       | `false \| ReconnectOptions` | No       | Reconnect policy while subscriptions are active.               |
+| `heartbeat`       | `false \| HeartbeatOptions` | No       | Liveness probe for idle connections. Enabled by default.       |
+
+#### Reconnect Options
+
+| Option       | Default    | Description                                         |
+| ------------ | ---------- | --------------------------------------------------- |
+| `retries`    | `Infinity` | Reconnect attempts after a drop.                    |
+| `delayMs`    | `100`      | Delay before the first reconnect attempt.           |
+| `maxDelayMs` | `30_000`   | Upper bound for the exponential backoff delay.      |
+| `factor`     | `2`        | Multiplier applied to the delay after each attempt. |
+
+#### Heartbeat Options
+
+| Option       | Default         | Description                                                       |
+| ------------ | --------------- | ----------------------------------------------------------------- |
+| `intervalMs` | `30_000`        | Idle time without any received message before a probe is sent.    |
+| `timeoutMs`  | `10_000`        | Maximum wait for the probe response.                              |
+| `method`     | `"eth_chainId"` | Probe method: `eth_chainId`, `net_version`, or `eth_blockNumber`. |
+
+Any received message counts as activity, so a busy connection is never probed. A JSON-RPC error
+response still proves the connection is alive. When a probe gets no answer, the socket is dropped
+immediately with close code `4000`, the failure is reported through `onError`, and the usual
+reconnect policy applies.
+
+#### Connection Sharing
+
+Concurrent `connect()` and `request()` calls share one opening attempt bounded by the transport
+`timeoutMs`. A caller's own `signal` or `timeoutMs` only ends that caller's wait: the attempt keeps
+going for the other callers and the resulting socket is reused. Only `close()` cancels it.
+
+#### Binary Messages
+
+The transport sets `binaryType` to `"arraybuffer"` on every socket that exposes it. Text,
+`ArrayBuffer`, and typed-array messages are accepted. `Blob` messages are rejected with a
+`WebSocketProtocolError`, because decoding them is asynchronous and would reorder messages.
 
 Call `close()` when the transport is no longer needed. Closing rejects pending requests, unbinds
 subscriptions, closes the socket, and permanently stops that transport instance.
@@ -415,9 +454,17 @@ await subscription.unsubscribe();
 transport.close();
 ```
 
-When a socket closes with active subscriptions, the transport reconnects according to its retry
-policy and sends new `eth_subscribe` requests. Each subscription object exposes its latest ID.
-Pending requests reject on disconnect and can retry independently.
+When a socket closes with active subscriptions, the transport reconnects according to its
+`reconnect` policy and sends new `eth_subscribe` requests. By default it keeps trying with capped
+exponential backoff until the endpoint recovers or `close()` is called. Every failed attempt is
+reported through `onError`. Each subscription object exposes its latest ID, which is `undefined`
+while disconnected. Pending requests reject on disconnect and can retry independently.
+
+If an `eth_subscribe` request times out or is aborted but the provider answers within 60 seconds,
+the transport immediately sends `eth_unsubscribe` for that late subscription.
+
+With `reconnect: false`, the transport does not reconnect on its own. Subscriptions are kept and
+restored on the next successful connection, for example after `connect()` or any `request()`.
 
 #### Subscription Members
 

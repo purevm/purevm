@@ -13,6 +13,8 @@ modules/*
 !modules/newHeads/**
 !modules/newBlocks/
 !modules/newBlocks/**
+!modules/fetchBlocks/
+!modules/fetchBlocks/**
 
 # Env and logs
 .env

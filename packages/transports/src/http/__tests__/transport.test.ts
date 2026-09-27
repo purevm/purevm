@@ -112,6 +112,25 @@ test("does not retry non-transient HTTP status errors", async () => {
   expect(attempts).toBe(1);
 });
 
+test("classifies error statuses with non-JSON-RPC JSON bodies by HTTP status", async () => {
+  let attempts = 0;
+  const transport = new HttpTransport({
+    url: "https://rpc.example.com",
+    retry: { delayMs: 0, retries: 2 },
+    fetch: async () => {
+      attempts += 1;
+      return Response.json({ error: "rate limited" }, { status: 429 });
+    },
+  });
+
+  const error = await transport.request<ChainId>({ method: "eth_chainId" }).catch((e) => e);
+
+  expect(error).toBeInstanceOf(HttpStatusError);
+  expect(error).toMatchObject({ retryable: true, status: 429 });
+  expect(error.cause).toBeInstanceOf(RpcInvalidResponseError);
+  expect(attempts).toBe(3);
+});
+
 test("preserves provider errors returned with an HTTP error status", async () => {
   const transport = new HttpTransport({
     url: "https://rpc.example.com",

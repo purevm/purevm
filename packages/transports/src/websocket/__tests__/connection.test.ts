@@ -11,6 +11,13 @@ test("opens a WebSocket", async () => {
   await expect(openWebSocket("ws://rpc.example.com", () => socket, 100)).resolves.toBe(socket);
 });
 
+test("requests ArrayBuffer binary messages", async () => {
+  const socket = Object.assign(new FakeWebSocket(), { binaryType: "blob" });
+  await openWebSocket("ws://rpc.example.com", () => socket, 100);
+
+  expect(socket.binaryType).toBe("arraybuffer");
+});
+
 test("wraps synchronous factory failures", async () => {
   const cause = new Error("factory failed");
 

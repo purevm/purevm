@@ -43,6 +43,12 @@ function isSubscriptionMessage(
 
 function messageText(data: unknown): string {
   if (typeof data === "string") return data;
+  if (typeof Blob !== "undefined" && data instanceof Blob) {
+    throw new WebSocketProtocolError(
+      'Blob WebSocket messages are not supported. Set binaryType to "arraybuffer".',
+      data,
+    );
+  }
   if (data instanceof ArrayBuffer) return new TextDecoder().decode(data);
   if (ArrayBuffer.isView(data)) {
     const bytes = new Uint8Array(data.buffer as ArrayBuffer, data.byteOffset, data.byteLength);
