@@ -1,0 +1,13 @@
+# Git commit messages
+
+- Output exactly one subject line and no body or explanation.
+- Always use `type(scope): description`; never omit the scope.
+- Allowed types are `feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, `chore`, `perf`, `style`, and `revert`.
+- Use the affected workspace or project area as the scope, such as `public`, `transports`, `extensions`, `fetch-blocks`, `new-blocks`, `new-heads`, `config`, or `repo`.
+- Write the description in English, in the imperative mood, lowercase, and without a final period.
+- Keep the complete subject at 160 characters or fewer.
+- Ignore repository history when it conflicts with these rules.
+
+Valid example: `fix(transports): handle websocket reconnection`
+
+Invalid example: `chore: update project files`

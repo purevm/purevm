@@ -4,15 +4,15 @@ Monorepo for the `@purevm` npm scope.
 
 ## Packages
 
-| Package                                       | Path                  | Description                                              |
-| --------------------------------------------- | --------------------- | -------------------------------------------------------- |
-| [`@purevm/rpc`](./packages/rpc)               | `packages/rpc`        | HTTP and WebSocket RPC toolkit for EVM-compatible chains |
-| [`@purevm/transports`](./packages/transports) | `packages/transports` | Small JSON-RPC transports for HTTP and WebSocket         |
+| Package                                       | Path                  | Description                                                     |
+| --------------------------------------------- | --------------------- | --------------------------------------------------------------- |
+| [`@purevm/public`](./packages/public)         | `packages/public`     | Read-only public actions for EVM chains over HTTP and WebSocket |
+| [`@purevm/transports`](./packages/transports) | `packages/transports` | Small JSON-RPC transports for HTTP and WebSocket                |
 
 Install packages independently:
 
 ```bash
-pnpm add @purevm/rpc
+pnpm add @purevm/public
 ```
 
 `@purevm/wallet` will live in `packages/wallet` when it is added.

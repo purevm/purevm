@@ -1,0 +1,46 @@
+name: Public
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/public.yml"
+      - ".oxfmtrc.json"
+      - ".oxlintrc.json"
+      - "package.json"
+      - "packages/public/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+  pull_request:
+    paths:
+      - ".github/workflows/public.yml"
+      - ".oxfmtrc.json"
+      - ".oxlintrc.json"
+      - "package.json"
+      - "packages/public/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+
+concurrency:
+  group: public-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate public
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @purevm/public validate

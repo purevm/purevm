@@ -4,6 +4,7 @@
     "description": "A fast, lightweight, dependency-free TypeScript toolkit for interacting with EVM blockchains.",
     "scripts": {
         "build": "pnpm -r --if-present build",
+        "commitlint": "commitlint",
         "test": "pnpm -r --if-present test && pnpm test:new-heads && pnpm test:new-blocks && pnpm test:fetch-blocks && pnpm test:extensions",
         "test:extensions": "vitest run --config modules/extensions/vitest.config.mts",
         "test:extensions:coverage": "vitest run --config modules/extensions/vitest.config.mts --coverage",
@@ -21,6 +22,7 @@
         "lint": "oxlint --deny-warnings --report-unused-disable-directives . && pnpm lint:variables",
         "lint:fix": "oxlint --fix --deny-warnings --report-unused-disable-directives .",
         "lint:variables": "node scripts/check-untyped-variables.mjs .",
+        "prepare": "simple-git-hooks",
         "format": "oxfmt .",
         "format:check": "oxfmt --check .",
         "inspect:extensions:block": "tsx modules/extensions/scripts/inspect-block.ts",
@@ -33,16 +35,22 @@
         "validate": "pnpm typecheck && pnpm check"
     },
     "dependencies": {
-        "@purevm/rpc": "workspace:*"
+        "@purevm/public": "workspace:*"
     },
     "devDependencies": {
+        "@commitlint/cli": "^21.2.3",
+        "@commitlint/config-conventional": "^21.2.3",
         "@types/node": "^26.4.0",
         "@vitest/coverage-v8": "^4.1.11",
         "oxfmt": "^0.65.0",
         "oxlint": "^1.80.0",
+        "simple-git-hooks": "^2.14.0",
         "tsx": "^4.23.13",
         "typescript": "^7.0.2",
         "vitest": "^4.1.11"
+    },
+    "simple-git-hooks": {
+        "commit-msg": "pnpm commitlint --edit \"$1\""
     },
     "packageManager": "pnpm@10.34.5"
 }
