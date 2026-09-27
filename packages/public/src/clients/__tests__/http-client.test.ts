@@ -345,6 +345,11 @@ const cases: readonly Case[] = [
   ["netVersion", (c) => c.netVersion(), "net_version"],
   ["web3ClientVersion", (c) => c.web3ClientVersion(), "web3_clientVersion"],
   ["web3Sha3", (c) => c.web3Sha3("0x68656c6c6f"), "web3_sha3", ["0x68656c6c6f"]],
+  // txpool
+  ["txpoolContent", (c) => c.txpoolContent(), "txpool_content"],
+  ["txpoolContentFrom", (c) => c.txpoolContentFrom(address), "txpool_contentFrom", [address]],
+  ["txpoolInspect", (c) => c.txpoolInspect(), "txpool_inspect"],
+  ["txpoolStatus", (c) => c.txpoolStatus(), "txpool_status"],
   // debug
   ["debugGetBadBlocks", (c) => c.debugGetBadBlocks(), "debug_getBadBlocks"],
   ["debugGetRawBlockByHash", (c) => c.debugGetRawBlockByHash(hash), "debug_getRawBlock", [hash]],
@@ -537,7 +542,8 @@ test.for(cases)("%s sends the exact JSON-RPC request", async ([, invoke, method,
 test("covers every exported action", () => {
   const exported = Object.entries(actions)
     .filter(
-      ([name, value]) => typeof value === "function" && /^(eth|net|web3|debug|trace)/.test(name),
+      ([name, value]) =>
+        typeof value === "function" && /^(eth|net|web3|debug|trace|txpool)/.test(name),
     )
     .map(([name]) => name)
     .toSorted();

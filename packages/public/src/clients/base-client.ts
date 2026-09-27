@@ -108,8 +108,17 @@ import {
   type RpcSyncingStatus,
   type RpcTransaction,
   type RpcTransactionReceipt,
+  txpoolContent,
+  txpoolContentFrom,
+  txpoolInspect,
+  txpoolStatus,
+  type TxpoolContent,
+  type TxpoolContentFrom,
+  type TxpoolInspect,
+  type TxpoolStatus,
 } from "../actions/index.js";
 import type {
+  Address,
   BlockHash,
   BlockNumber,
   BlockTag,
@@ -499,6 +508,22 @@ export class BaseClient<options extends RequestOptions> {
 
   netVersion(options?: options): Promise<string> {
     return netVersion(this.requester, options);
+  }
+
+  txpoolContent(options?: options): Promise<TxpoolContent> {
+    return txpoolContent(this.requester, options);
+  }
+
+  txpoolContentFrom(address: Address, options?: options): Promise<TxpoolContentFrom> {
+    return txpoolContentFrom(this.requester, address, options);
+  }
+
+  txpoolInspect(options?: options): Promise<TxpoolInspect> {
+    return txpoolInspect(this.requester, options);
+  }
+
+  txpoolStatus(options?: options): Promise<TxpoolStatus> {
+    return txpoolStatus(this.requester, options);
   }
 
   web3ClientVersion(options?: options): Promise<string> {

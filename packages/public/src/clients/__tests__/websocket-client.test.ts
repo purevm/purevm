@@ -88,3 +88,21 @@ test("connects explicitly and omits optional subscription parameters", async () 
   await pending.unsubscribe();
   client.close();
 });
+
+test("exposes txpool actions over WebSocket", async () => {
+  const socket = new FakeWebSocket();
+  const client = createWebSocketClient({
+    url: "ws://rpc.example.com",
+    createWebSocket: () => socket,
+    retry: false,
+  });
+
+  await client.txpoolStatus();
+  await client.txpoolContentFrom("0x1234");
+
+  expect(socket.sent.map(({ method, params }) => ({ method, params }))).toEqual([
+    { method: "txpool_status", params: undefined },
+    { method: "txpool_contentFrom", params: ["0x1234"] },
+  ]);
+  client.close();
+});

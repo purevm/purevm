@@ -124,6 +124,10 @@ Ethereum execution API specification, so they have no `ByHash` variant.
 | `netVersion`                             | `net_version`                          |
 | `web3ClientVersion`                      | `web3_clientVersion`                   |
 | `web3Sha3`                               | `web3_sha3`                            |
+| `txpoolContent`                          | `txpool_content`                       |
+| `txpoolContentFrom`                      | `txpool_contentFrom`                   |
+| `txpoolInspect`                          | `txpool_inspect`                       |
+| `txpoolStatus`                           | `txpool_status`                        |
 | `debugGetBadBlocks`                      | `debug_getBadBlocks`                   |
 | `debugGetRawBlockByHash`                 | `debug_getRawBlock`                    |
 | `debugGetRawBlockByNumber`               | `debug_getRawBlock`                    |
@@ -198,6 +202,28 @@ const result = await client.ethCallByTag({
 State overrides are supported by Geth, Reth, Erigon, Nethermind, and Besu. Block overrides on
 `eth_call` are supported by Geth and Reth. `eth_estimateGas` takes no block overrides because not
 every client accepts them.
+
+### Transaction Pool
+
+`txpoolStatus`, `txpoolContent`, `txpoolContentFrom`, and `txpoolInspect` read the node's mempool.
+They are available on both `HttpClient` and `WebSocketClient`. Content is keyed by sender address,
+then by decimal nonce:
+
+```ts
+import { createHttpClient } from "@purevm/public";
+
+const client = createHttpClient({ url: "http://localhost:8545" });
+
+const { pending, queued } = await client.txpoolStatus();
+const content = await client.txpoolContentFrom("0x0000000000000000000000000000000000000001");
+for (const [nonce, transaction] of Object.entries(content.pending)) {
+  console.log(nonce, transaction.hash);
+}
+```
+
+Geth and Reth implement all four methods; Erigon and Nethermind implement a subset, and Besu
+exposes its own `txpool_besu*` methods instead. Most public RPC providers disable this namespace, so
+it usually requires your own node.
 
 ### Debug Tracers
 
