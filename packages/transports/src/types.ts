@@ -35,27 +35,27 @@ export type RpcErrorObject = {
 };
 
 export type RetryOptions = {
-  retries?: number;
-  delayMs?: number;
-  maxDelayMs?: number;
-  factor?: number;
-  shouldRetry?: (error: unknown, attempt: number) => boolean;
+  retries?: number | undefined;
+  delayMs?: number | undefined;
+  maxDelayMs?: number | undefined;
+  factor?: number | undefined;
+  shouldRetry?: ((error: unknown, attempt: number) => boolean) | undefined;
 };
 
 export type TransportOptions = {
-  timeoutMs?: number;
-  retry?: false | RetryOptions;
+  timeoutMs?: number | undefined;
+  retry?: false | RetryOptions | undefined;
 };
 
 export type RequestOptions = {
-  signal?: AbortSignal;
-  timeoutMs?: number;
-  retry?: false | RetryOptions;
+  signal?: AbortSignal | undefined;
+  timeoutMs?: number | undefined;
+  retry?: false | RetryOptions | undefined;
 };
 
-export interface Transport {
+export type Transport = {
   request<method extends RpcMethod>(
     call: RpcCall<method>,
     options?: RequestOptions,
   ): Promise<method["result"]>;
-}
+};

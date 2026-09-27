@@ -1,17 +1,9 @@
-import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { expect, test, vi } from "vitest";
 
 import { RpcTimeoutError } from "../../errors/index.js";
 import { LATE_SUBSCRIPTION_TTL_MS } from "../late-subscriptions.js";
 import { WebSocketTransport } from "../transport.js";
 import { FakeWebSocket, type FakeRequest } from "./fake-websocket.js";
-
-beforeEach(() => {
-  vi.useFakeTimers();
-});
-
-afterEach(() => {
-  vi.useRealTimers();
-});
 
 /** Answers `eth_subscribe` after `delayMs`, everything else immediately. */
 function setup(delaysMs: readonly number[]) {

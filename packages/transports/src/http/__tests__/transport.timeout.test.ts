@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 
 import { RpcAbortError, RpcTimeoutError } from "../../errors/index.js";
 import { HttpTransport } from "../transport.js";
@@ -23,12 +23,13 @@ test("returns typed timeout error", async () => {
     url: "https://rpc.example.com",
     fetch: abortingFetch,
     retry: false,
-    timeoutMs: 1,
+    timeoutMs: 100,
   });
 
-  await expect(transport.request<ChainId>({ method: "eth_chainId" })).rejects.toBeInstanceOf(
-    RpcTimeoutError,
-  );
+  const request = transport.request<ChainId>({ method: "eth_chainId" }).catch((e: unknown) => e);
+  await vi.advanceTimersByTimeAsync(100);
+
+  expect(await request).toBeInstanceOf(RpcTimeoutError);
 });
 
 test("does not retry caller abort", async () => {
@@ -48,8 +49,8 @@ test("retries timeout failures when configured", async () => {
   let attempts = 0;
   const transport = new HttpTransport({
     url: "https://rpc.example.com",
-    retry: { delayMs: 0, retries: 1 },
-    timeoutMs: 1,
+    retry: { delayMs: 50, retries: 1 },
+    timeoutMs: 100,
     fetch: async (_input, init) => {
       attempts += 1;
       if (attempts === 1) return abortingFetch(_input, init);
@@ -58,7 +59,12 @@ test("retries timeout failures when configured", async () => {
     },
   });
 
-  await expect(transport.request<ChainId>({ method: "eth_chainId" })).resolves.toBe("0x1");
+  const request = transport.request<ChainId>({ method: "eth_chainId" });
+  await vi.advanceTimersByTimeAsync(149);
+  expect(attempts).toBe(1);
+  await vi.advanceTimersByTimeAsync(1);
+
+  await expect(request).resolves.toBe("0x1");
   expect(attempts).toBe(2);
 });
 
@@ -70,7 +76,10 @@ test("uses request timeout override", async () => {
     timeoutMs: 1_000,
   });
 
-  await expect(
-    transport.request<ChainId>({ method: "eth_chainId" }, { timeoutMs: 1 }),
-  ).rejects.toEqual(expect.objectContaining({ timeoutMs: 1 }));
+  const request = transport
+    .request<ChainId>({ method: "eth_chainId" }, { timeoutMs: 100 })
+    .catch((e: unknown) => e);
+  await vi.advanceTimersByTimeAsync(100);
+
+  expect(await request).toEqual(expect.objectContaining({ timeoutMs: 100 }));
 });

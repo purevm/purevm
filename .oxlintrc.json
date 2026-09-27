@@ -73,7 +73,7 @@
     },
     "overrides": [
         {
-            "files": ["**/__tests__/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
+            "files": ["**/__tests__/**/*.ts", "**/*.test.ts", "**/*.integ.ts", "**/*.spec.ts"],
             "env": {
                 "vitest": true
             },

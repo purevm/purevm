@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 
 import { RpcResponseError, RpcSerializationError } from "../../errors/index.js";
 import { WebSocketTransport } from "../transport.js";
@@ -60,11 +60,14 @@ test("reports malformed unsolicited messages", async () => {
 
 test("times out an unanswered request", async () => {
   const socket = new FakeWebSocket({ onSend: () => undefined });
-  const transport = createTransport(socket, { timeoutMs: 1 });
+  const transport = createTransport(socket, { timeoutMs: 100 });
 
-  await expect(transport.request<ChainId>({ method: "eth_chainId" })).rejects.toEqual(
-    expect.objectContaining({ timeoutMs: 1 }),
-  );
+  const request = transport.request<ChainId>({ method: "eth_chainId" }).catch((e: unknown) => e);
+  await vi.advanceTimersByTimeAsync(99);
+  expect(socket.sent).toHaveLength(1);
+  await vi.advanceTimersByTimeAsync(1);
+
+  expect(await request).toEqual(expect.objectContaining({ timeoutMs: 100 }));
   transport.close();
 });
 
@@ -76,7 +79,8 @@ test("aborts a pending request", async () => {
     { method: "eth_chainId" },
     { signal: controller.signal },
   );
-  await waitFor(() => socket.sent.length === 1);
+  await vi.advanceTimersByTimeAsync(0);
+  expect(socket.sent).toHaveLength(1);
   controller.abort("stop");
 
   await expect(request).rejects.toEqual(expect.objectContaining({ cause: "stop" }));
@@ -110,7 +114,7 @@ test("retries failed connection attempts", async () => {
   let attempts = 0;
   const transport = new WebSocketTransport({
     url: "ws://rpc.example.com",
-    retry: { delayMs: 0, retries: 1 },
+    retry: { delayMs: 100, retries: 1 },
     createWebSocket: () => {
       attempts += 1;
       if (attempts === 1) throw new Error("connection failed");
@@ -118,7 +122,12 @@ test("retries failed connection attempts", async () => {
     },
   });
 
-  await expect(transport.request<ChainId>({ method: "eth_chainId" })).resolves.toBe("0x1");
+  const request = transport.request<ChainId>({ method: "eth_chainId" });
+  await vi.advanceTimersByTimeAsync(99);
+  expect(attempts).toBe(1);
+  await vi.advanceTimersByTimeAsync(1);
+
+  await expect(request).resolves.toBe("0x1");
   expect(attempts).toBe(2);
   transport.close();
 });
@@ -133,12 +142,4 @@ function createTransport(
     retry: false,
     ...options,
   });
-}
-
-async function waitFor(predicate: () => boolean): Promise<void> {
-  const deadline = Date.now() + 500;
-  while (!predicate()) {
-    if (Date.now() >= deadline) throw new Error("Condition not met.");
-    await new Promise((resolve) => setTimeout(resolve, 1));
-  }
 }

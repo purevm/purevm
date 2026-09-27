@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 
 import { WebSocketConnectionError } from "../../errors/index.js";
 import { closeMessage, defaultWebSocketFactory, openWebSocket } from "../socket.js";
@@ -47,9 +47,12 @@ test("wraps connection error and close events", async () => {
 test("times out an unopened connection", async () => {
   const socket = new FakeWebSocket({ autoOpen: false });
 
-  await expect(openWebSocket("ws://rpc.example.com", () => socket, 1)).rejects.toEqual(
-    expect.objectContaining({ timeoutMs: 1 }),
-  );
+  const opening = openWebSocket("ws://rpc.example.com", () => socket, 100).catch((e: unknown) => e);
+  await vi.advanceTimersByTimeAsync(99);
+  expect(socket.readyState).toBe(0);
+  await vi.advanceTimersByTimeAsync(1);
+
+  expect(await opening).toEqual(expect.objectContaining({ timeoutMs: 100 }));
   expect(socket.readyState).toBe(3);
 });
 

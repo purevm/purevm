@@ -18,7 +18,7 @@ import { parseHttpUrl } from "./url.js";
 export class HttpTransport implements Transport {
   readonly url: string;
 
-  private readonly authorization?: string;
+  private readonly authorization?: string | undefined;
   private readonly options: HttpTransportOptions;
   private readonly fetch: typeof globalThis.fetch;
   private readonly nextId = createRequestIdGenerator();

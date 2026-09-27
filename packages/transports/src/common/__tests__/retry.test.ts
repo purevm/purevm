@@ -12,6 +12,15 @@ test("merges retry options and allows request overrides", () => {
   expect(retry).toMatchObject({ delayMs: 0, factor: 3, retries: 1 });
 });
 
+test("falls back to defaults for explicitly undefined retry fields", () => {
+  const retry = resolveRetry(
+    { retry: { delayMs: 10, retries: undefined } },
+    { retry: { delayMs: undefined, factor: undefined } },
+  );
+
+  expect(retry).toMatchObject({ delayMs: 10, factor: 2, maxDelayMs: 1_000, retries: 2 });
+});
+
 test("disables retry from transport or request options", () => {
   expect(resolveRetry({ retry: false }, {})).toBe(false);
   expect(resolveRetry({ retry: { retries: 2 } }, { retry: false })).toBe(false);
@@ -36,15 +45,18 @@ test("retries retryable failures and reports retry attempts", async () => {
     .mockResolvedValue("done");
   const shouldRetry = vi.fn<() => boolean>(() => true);
 
-  await expect(
-    withRetry(operation, {
-      delayMs: 0,
-      factor: 1,
-      maxDelayMs: 0,
-      retries: 1,
-      shouldRetry,
-    }),
-  ).resolves.toBe("done");
+  const result = withRetry(operation, {
+    delayMs: 100,
+    factor: 1,
+    maxDelayMs: 100,
+    retries: 1,
+    shouldRetry,
+  });
+
+  await vi.advanceTimersByTimeAsync(99);
+  expect(operation).toHaveBeenCalledTimes(1);
+  await vi.advanceTimersByTimeAsync(1);
+  await expect(result).resolves.toBe("done");
   expect(operation).toHaveBeenCalledTimes(2);
   expect(shouldRetry).toHaveBeenCalledWith(expect.any(RpcNetworkError), 1);
 });

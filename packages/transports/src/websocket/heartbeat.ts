@@ -51,7 +51,7 @@ export class Heartbeat {
   private readonly options: ResolvedHeartbeatOptions;
   private readonly ping: (method: HeartbeatMethod, timeoutMs: number) => Promise<unknown>;
   private readonly onFailure: (error: Error) => void;
-  private timer?: ReturnType<typeof setTimeout>;
+  private timer?: ReturnType<typeof setTimeout> | undefined;
   private lastActivity = 0;
   private generation = 0;
 

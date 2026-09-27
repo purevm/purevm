@@ -1,17 +1,9 @@
-import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { expect, test, vi } from "vitest";
 
 import { WebSocketConnectionError } from "../../errors/index.js";
 import { WebSocketTransport } from "../transport.js";
 import type { WebSocketTransportOptions } from "../types.js";
 import { FakeWebSocket, type FakeWebSocketOptions } from "./fake-websocket.js";
-
-beforeEach(() => {
-  vi.useFakeTimers();
-});
-
-afterEach(() => {
-  vi.useRealTimers();
-});
 
 function setup(
   options: Partial<WebSocketTransportOptions> = {},

@@ -1,5 +1,8 @@
 {
     "extends": "../../tsconfig.base.json",
-    "include": ["src/**/*.ts", "vitest.config.ts"],
+    "compilerOptions": {
+        "exactOptionalPropertyTypes": true
+    },
+    "include": ["src/**/*.ts", "vitest.config.ts", "vitest.setup.ts"],
     "exclude": ["node_modules", "dist"]
 }

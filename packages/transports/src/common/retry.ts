@@ -1,8 +1,12 @@
 import { RpcAbortError, isRetryableError } from "../errors/index.js";
-import type { RequestOptions, RetryOptions, TransportOptions } from "../types.js";
+import type { RequestOptions, TransportOptions } from "../types.js";
 
-type ResolvedRetryOptions = Required<Omit<RetryOptions, "shouldRetry">> & {
-  shouldRetry: NonNullable<RetryOptions["shouldRetry"]>;
+type ResolvedRetryOptions = {
+  retries: number;
+  delayMs: number;
+  maxDelayMs: number;
+  factor: number;
+  shouldRetry: (error: unknown, attempt: number) => boolean;
 };
 
 const DEFAULT_RETRY: ResolvedRetryOptions = {
@@ -17,14 +21,20 @@ export function resolveRetry(
   transport: TransportOptions,
   request: RequestOptions,
 ): false | ResolvedRetryOptions {
-  if (request.retry === false || (request.retry === undefined && transport.retry === false)) {
+  const requestRetry = request.retry;
+  const transportRetry = transport.retry;
+  if (requestRetry === false || (requestRetry === undefined && transportRetry === false)) {
     return false;
   }
 
-  const retry = {
-    ...DEFAULT_RETRY,
-    ...transport.retry,
-    ...request.retry,
+  // Field by field, so an explicit `undefined` falls back instead of erasing a default.
+  const base = transportRetry === false ? undefined : transportRetry;
+  const retry: ResolvedRetryOptions = {
+    retries: requestRetry?.retries ?? base?.retries ?? DEFAULT_RETRY.retries,
+    delayMs: requestRetry?.delayMs ?? base?.delayMs ?? DEFAULT_RETRY.delayMs,
+    maxDelayMs: requestRetry?.maxDelayMs ?? base?.maxDelayMs ?? DEFAULT_RETRY.maxDelayMs,
+    factor: requestRetry?.factor ?? base?.factor ?? DEFAULT_RETRY.factor,
+    shouldRetry: requestRetry?.shouldRetry ?? base?.shouldRetry ?? DEFAULT_RETRY.shouldRetry,
   };
   if (!Number.isSafeInteger(retry.retries) || retry.retries < 0) {
     throw new RangeError("retry.retries must be a non-negative safe integer.");

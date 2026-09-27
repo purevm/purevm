@@ -33,18 +33,6 @@ import type {
 } from "./types.js";
 import { parseWebSocketUrl } from "./url.js";
 
-type SubscribeMethod = {
-  method: "eth_subscribe";
-  params: readonly JsonValue[];
-  result: string;
-};
-
-type HeartbeatCall = {
-  method: HeartbeatMethod;
-  params?: undefined;
-  result: unknown;
-};
-
 type UnsubscribeMethod = {
   method: "eth_unsubscribe";
   params: readonly [string];
@@ -62,8 +50,8 @@ export class WebSocketTransport implements Transport {
   private readonly nextId = createRequestIdGenerator();
   private readonly reconnect: false | ResolvedReconnectOptions;
   private readonly reconnectAbort = new AbortController();
-  private readonly heartbeat?: Heartbeat;
-  private reconnecting?: Promise<void>;
+  private readonly heartbeat?: Heartbeat | undefined;
+  private reconnecting?: Promise<void> | undefined;
   private reconnectRequested = false;
   private stopped = false;
 
@@ -85,7 +73,10 @@ export class WebSocketTransport implements Transport {
     );
     this.subscriber = new SubscriptionManager(
       (params, requestOptions) =>
-        this.request<SubscribeMethod>({ method: "eth_subscribe", params }, requestOptions),
+        this.request<{ method: "eth_subscribe"; params: readonly JsonValue[]; result: string }>(
+          { method: "eth_subscribe", params },
+          requestOptions,
+        ),
       (id, requestOptions) =>
         this.request<UnsubscribeMethod>(
           { method: "eth_unsubscribe", params: [id] },
@@ -96,7 +87,11 @@ export class WebSocketTransport implements Transport {
     if (heartbeat !== false) {
       this.heartbeat = new Heartbeat(
         heartbeat,
-        (method, timeoutMs) => this.request<HeartbeatCall>({ method }, { retry: false, timeoutMs }),
+        (method, timeoutMs) =>
+          this.request<{ method: HeartbeatMethod; result: unknown }>(
+            { method },
+            { retry: false, timeoutMs },
+          ),
         (error) => {
           this.report(error);
           this.connection.drop(error);

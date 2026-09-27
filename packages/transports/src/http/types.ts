@@ -6,10 +6,10 @@ export type HttpHeaders = ConstructorParameters<typeof Headers>[0];
 
 export type HttpTransportOptions = TransportOptions & {
   url: HttpUrl | string;
-  headers?: HttpHeaders;
-  fetch?: typeof globalThis.fetch;
+  headers?: HttpHeaders | undefined;
+  fetch?: typeof globalThis.fetch | undefined;
 };
 
 export type HttpRequestOptions = RequestOptions & {
-  headers?: HttpHeaders;
+  headers?: HttpHeaders | undefined;
 };

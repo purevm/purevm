@@ -2,14 +2,14 @@ import type { JsonValue, RequestOptions, TransportOptions } from "../types.js";
 
 export type WebSocketEvent = {
   data?: unknown;
-  code?: number;
-  reason?: string;
+  code?: number | undefined;
+  reason?: string | undefined;
   error?: unknown;
 };
 
 export type WebSocketListener = (event: WebSocketEvent) => void;
 
-export interface WebSocketLike {
+export type WebSocketLike = {
   readonly readyState: number;
   /** Set to `"arraybuffer"` on open when present. Blob messages are rejected. */
   binaryType?: string | undefined;
@@ -20,7 +20,7 @@ export interface WebSocketLike {
   ): void;
   send(data: string): void;
   close(code?: number, reason?: string): void;
-}
+};
 
 export type WebSocketFactory = (url: string) => WebSocketLike;
 
@@ -48,8 +48,8 @@ export type HeartbeatOptions = {
 
 export type WebSocketTransportOptions = TransportOptions & {
   url: `ws://${string}` | `wss://${string}` | string;
-  createWebSocket?: WebSocketFactory;
-  onError?: (error: Error) => void;
+  createWebSocket?: WebSocketFactory | undefined;
+  onError?: ((error: Error) => void) | undefined;
   /** Automatic reconnection while subscriptions are active. `false` disables it. */
   reconnect?: false | ReconnectOptions | undefined;
   /** Liveness probe for idle connections. `false` disables it. */
@@ -59,10 +59,10 @@ export type WebSocketTransportOptions = TransportOptions & {
 export type SubscribeOptions<result> = {
   params: readonly JsonValue[];
   onData(result: result): void;
-  onError?: (error: Error) => void;
+  onError?: ((error: Error) => void) | undefined;
 };
 
-export interface RpcSubscription {
+export type RpcSubscription = {
   readonly id: string | undefined;
   unsubscribe(options?: RequestOptions): Promise<boolean>;
-}
+};

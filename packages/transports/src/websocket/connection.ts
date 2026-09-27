@@ -21,8 +21,8 @@ export class WebSocketConnection {
   private readonly handlers: WebSocketConnectionHandlers;
   private readonly openTimeoutMs: number;
   private readonly closing = new AbortController();
-  private socket?: WebSocketLike;
-  private connecting?: Promise<void>;
+  private socket?: WebSocketLike | undefined;
+  private connecting?: Promise<void> | undefined;
   private stopped = false;
 
   /** `openTimeoutMs` bounds the shared opening attempt, independently of any caller. */

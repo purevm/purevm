@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 
 import {
   HttpStatusError,
@@ -30,7 +30,10 @@ test("retries transient status errors", async () => {
     },
   });
 
-  await expect(transport.request<ChainId>({ method: "eth_chainId" })).resolves.toBe("0x1");
+  const request = transport.request<ChainId>({ method: "eth_chainId" });
+  await vi.runAllTimersAsync();
+
+  await expect(request).resolves.toBe("0x1");
   expect(attempts).toBe(3);
 });
 
@@ -123,7 +126,9 @@ test("classifies error statuses with non-JSON-RPC JSON bodies by HTTP status", a
     },
   });
 
-  const error = await transport.request<ChainId>({ method: "eth_chainId" }).catch((e) => e);
+  const request = transport.request<ChainId>({ method: "eth_chainId" }).catch((e: unknown) => e);
+  await vi.runAllTimersAsync();
+  const error = (await request) as HttpStatusError;
 
   expect(error).toBeInstanceOf(HttpStatusError);
   expect(error).toMatchObject({ retryable: true, status: 429 });
@@ -177,7 +182,10 @@ test("retries network failures", async () => {
     },
   });
 
-  await expect(transport.request<ChainId>({ method: "eth_chainId" })).resolves.toBe("0x1");
+  const request = transport.request<ChainId>({ method: "eth_chainId" });
+  await vi.runAllTimersAsync();
+
+  await expect(request).resolves.toBe("0x1");
   expect(attempts).toBe(2);
 });
 

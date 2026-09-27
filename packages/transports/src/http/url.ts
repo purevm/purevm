@@ -2,7 +2,7 @@ import type { HttpUrl } from "./types.js";
 
 export type ParsedHttpUrl = {
   url: HttpUrl;
-  authorization?: string;
+  authorization?: string | undefined;
 };
 
 export function parseHttpUrl(value: string): ParsedHttpUrl {

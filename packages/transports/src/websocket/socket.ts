@@ -64,7 +64,10 @@ export function defaultWebSocketFactory(url: string): WebSocketLike {
   return new WebSocketConstructor(url);
 }
 
-export function closeMessage(event: { code?: number; reason?: string }): string {
+export function closeMessage(event: {
+  code?: number | undefined;
+  reason?: string | undefined;
+}): string {
   const code = event.code === undefined ? "" : ` (${event.code})`;
   const reason = event.reason ? `: ${event.reason}` : "";
   return `WebSocket connection closed${code}${reason}.`;

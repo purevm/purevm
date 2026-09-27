@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 
 import {
   RpcAbortError,
@@ -56,7 +56,7 @@ test("reconnects and restores subscriptions", async () => {
     onData: (value) => values.push(value),
   });
   sockets[0]?.disconnect();
-  await waitFor(() => subscription.id === "subscription-2");
+  await advanceUntil(() => subscription.id === "subscription-2");
   sockets[1]?.receive({
     jsonrpc: "2.0",
     method: "eth_subscription",
@@ -98,7 +98,7 @@ test("retries failed subscription restoration", async () => {
   });
 
   sockets[0]?.disconnect();
-  await waitFor(() => subscription.id === "subscription-3");
+  await advanceUntil(() => subscription.id === "subscription-3");
 
   expect(restoreAttempts).toBe(3);
   // Reported once to the subscription and once to the transport.
@@ -123,15 +123,15 @@ test("keeps reconnecting until the endpoint recovers", async () => {
       return socket;
     },
     onError: (error) => errors.push(error),
-    reconnect: { delayMs: 0 },
+    reconnect: { delayMs: 10, maxDelayMs: 10 },
   });
   const subscription = await transport.subscribe({ params: ["newHeads"], onData: () => undefined });
 
   down = true;
   sockets[0]?.disconnect();
-  await waitFor(() => sockets.length > 10);
+  await advanceUntil(() => sockets.length > 10, 10);
   down = false;
-  await waitFor(() => subscription.id !== undefined);
+  await advanceUntil(() => subscription.id !== undefined);
 
   expect(subscription.id).toBe(`subscription-${sockets.length}`);
   expect(errors.length).toBeGreaterThan(5);
@@ -167,10 +167,10 @@ test("does not resurrect a subscription removed during restoration", async () =>
   });
 
   sockets[0]?.disconnect();
-  await waitFor(() => sockets[1]?.sent.some((r) => r.method === "eth_subscribe") === true);
+  await advanceUntil(() => sockets[1]?.sent.some((r) => r.method === "eth_subscribe") === true);
   await subscription.unsubscribe();
   release?.();
-  await waitFor(() => sockets[1]?.sent.some((r) => r.method === "eth_unsubscribe") === true);
+  await advanceUntil(() => sockets[1]?.sent.some((r) => r.method === "eth_unsubscribe") === true);
   sockets[1]?.receive({
     jsonrpc: "2.0",
     method: "eth_subscription",
@@ -199,12 +199,12 @@ test("restores subscriptions on the next connection when reconnect is disabled",
   const subscription = await transport.subscribe({ params: ["newHeads"], onData: () => undefined });
 
   sockets[0]?.disconnect();
-  await new Promise((resolve) => setTimeout(resolve, 10));
+  await vi.advanceTimersByTimeAsync(10);
   expect(sockets).toHaveLength(1);
   expect(subscription.id).toBeUndefined();
 
   await transport.request<ChainId>({ method: "eth_chainId" });
-  await waitFor(() => subscription.id === "subscription-2");
+  await advanceUntil(() => subscription.id === "subscription-2");
   transport.close();
 });
 
@@ -227,11 +227,11 @@ test("stops reconnecting when closed", async () => {
 
   down = true;
   sockets[0]?.disconnect();
-  await waitFor(() => sockets.length > 2);
+  await advanceUntil(() => sockets.length > 2);
   transport.close();
   const count = sockets.length;
   const reported = errors.length;
-  await new Promise((resolve) => setTimeout(resolve, 30));
+  await vi.advanceTimersByTimeAsync(30);
 
   expect(sockets).toHaveLength(count);
   expect(errors).toHaveLength(reported);
@@ -280,7 +280,9 @@ test("keeps the shared connection attempt after a caller times out", async () =>
     },
   });
 
-  await expect(transport.connect({ timeoutMs: 1 })).rejects.toBeInstanceOf(RpcTimeoutError);
+  const waiting = transport.connect({ timeoutMs: 100 }).catch((e: unknown) => e);
+  await vi.advanceTimersByTimeAsync(100);
+  expect(await waiting).toBeInstanceOf(RpcTimeoutError);
   sockets[0]?.open();
   await transport.connect();
 
@@ -311,7 +313,7 @@ test("rejects pending and future requests when closed", async () => {
     retry: false,
   });
   const pending = transport.request<ChainId>({ method: "eth_chainId" });
-  await waitFor(() => socket.sent.length === 1);
+  await advanceUntil(() => socket.sent.length === 1);
 
   transport.close();
 
@@ -324,10 +326,10 @@ test("rejects pending and future requests when closed", async () => {
   ).rejects.toBeInstanceOf(WebSocketStoppedError);
 });
 
-async function waitFor(predicate: () => boolean): Promise<void> {
-  const deadline = Date.now() + 500;
-  while (!predicate()) {
-    if (Date.now() >= deadline) throw new Error("Condition not met.");
-    await new Promise((resolve) => setTimeout(resolve, 1));
+/** Advances fake time step by step until the condition holds. */
+async function advanceUntil(predicate: () => boolean, stepMs = 1): Promise<void> {
+  for (let step = 0; !predicate(); step += 1) {
+    if (step >= 1_000) throw new Error("Condition not met.");
+    await vi.advanceTimersByTimeAsync(stepMs);
   }
 }

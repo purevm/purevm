@@ -7,9 +7,9 @@ export type FakeRequest = {
 };
 
 export type FakeWebSocketOptions = {
-  autoOpen?: boolean;
-  subscriptionId?: string;
-  onSend?: (request: FakeRequest, socket: FakeWebSocket) => void;
+  autoOpen?: boolean | undefined;
+  subscriptionId?: string | undefined;
+  onSend?: ((request: FakeRequest, socket: FakeWebSocket) => void) | undefined;
 };
 
 export class FakeWebSocket implements WebSocketLike {

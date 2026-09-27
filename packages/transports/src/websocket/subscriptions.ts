@@ -4,8 +4,8 @@ import type { SubscribeOptions } from "./types.js";
 export type SubscriptionRecord = {
   readonly params: readonly JsonValue[];
   readonly onData: (result: unknown) => void;
-  readonly onError?: (error: Error) => void;
-  id?: string;
+  readonly onError?: ((error: Error) => void) | undefined;
+  id?: string | undefined;
 };
 
 export class Subscriptions {
@@ -52,7 +52,7 @@ export class Subscriptions {
     if (record.id) this.byId.delete(record.id);
   }
 
-  values(): SubscriptionRecord[] {
+  values(): readonly SubscriptionRecord[] {
     return [...this.records];
   }
 

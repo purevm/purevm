@@ -13,7 +13,7 @@
 ## Testing
 
 - Use Vitest for unit and integration tests.
-- Colocate tests in a `tests/` directory next to the source code under test.
+- Colocate tests in a `__tests__/` directory next to the source code under test.
 - Name unit tests `*.test.ts`. A unit test must not access real external dependencies. Use deterministic fakes for HTTP, WebSocket, timers, and other I/O boundaries.
 - Name integration tests `*.integ.ts`. An integration test accesses a real RPC or another real external service. Document its required environment variables, startup steps, command ordering, and other infrastructure requirements, including why each one is necessary.
 - Configure Vitest projects to collect `*.test.ts` as unit tests and `*.integ.ts` as integration tests.
