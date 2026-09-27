@@ -1,60 +1,71 @@
-import type { BlockHeader, BlockSource, NewBlocksEvent } from "./types.js";
+import type { BlockHeader } from "./types.js";
 
-export type BlockStateResult =
-  | { event: NewBlocksEvent; status: "accepted" }
-  | { status: "duplicate" | "old" };
+/**
+ * How a header relates to the emitted chain:
+ * - `first`: nothing emitted yet.
+ * - `next`: extends the head.
+ * - `duplicate`: this exact header was already emitted.
+ * - `stale`: older than the remembered history, so it cannot be classified.
+ * - `replacement`: a remembered height with another hash.
+ * - `parent-mismatch`: the next height, but it does not extend the head.
+ * - `gap`: one or more heights are missing between the head and this header.
+ */
+export type BlockRelation =
+  | "duplicate"
+  | "first"
+  | "gap"
+  | "next"
+  | "parent-mismatch"
+  | "replacement"
+  | "stale";
 
+/** Emitted head plus a bounded window of recent headers keyed by height. */
 export class BlockState {
-  private current?: BlockHeader;
+  private readonly history = new Map<bigint, BlockHeader>();
+  private readonly historySize: number;
+  private current?: BlockHeader | undefined;
 
-  clear(): void {
-    this.current = undefined;
+  constructor(historySize: number) {
+    this.historySize = historySize;
   }
 
-  update(block: BlockHeader, source: BlockSource): BlockStateResult {
-    const previous = this.current;
-    if (!previous) {
-      this.current = block;
-      return { event: { block, source, type: "block" }, status: "accepted" };
-    }
+  get head(): BlockHeader | undefined {
+    return this.current;
+  }
 
-    if (block.number < previous.number) return { status: "old" };
-    if (block.number === previous.number && block.hash === previous.hash) {
-      return { status: "duplicate" };
-    }
+  at(number: bigint): BlockHeader | undefined {
+    return this.history.get(number);
+  }
 
+  relation(block: BlockHeader): BlockRelation {
+    const head = this.current;
+    if (!head) return "first";
+    if (block.number <= head.number) {
+      const known = this.history.get(block.number);
+      if (!known) return "stale";
+      return known.hash === block.hash ? "duplicate" : "replacement";
+    }
+    if (block.number === head.number + 1n) {
+      return block.parentHash === head.hash ? "next" : "parent-mismatch";
+    }
+    return "gap";
+  }
+
+  /** Makes `block` the head, forgetting every remembered height at or above it. */
+  accept(block: BlockHeader): void {
+    for (const number of this.history.keys()) {
+      if (number >= block.number) this.history.delete(number);
+    }
+    this.history.set(block.number, block);
     this.current = block;
-    if (block.number === previous.number) {
-      return {
-        event: { block, kind: "replacement", previous, source, type: "reorg" },
-        status: "accepted",
-      };
+    for (const number of this.history.keys()) {
+      if (this.history.size <= this.historySize) break;
+      this.history.delete(number);
     }
+  }
 
-    if (block.number > previous.number + 1n) {
-      return {
-        event: {
-          block,
-          missing: {
-            count: block.number - previous.number - 1n,
-            from: previous.number + 1n,
-            to: block.number - 1n,
-          },
-          previous,
-          source,
-          type: "gap",
-        },
-        status: "accepted",
-      };
-    }
-
-    if (block.parentHash !== previous.hash) {
-      return {
-        event: { block, kind: "parent-mismatch", previous, source, type: "reorg" },
-        status: "accepted",
-      };
-    }
-
-    return { event: { block, previous, source, type: "block" }, status: "accepted" };
+  clear(): void {
+    this.history.clear();
+    this.current = undefined;
   }
 }

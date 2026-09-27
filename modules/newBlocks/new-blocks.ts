@@ -1,4 +1,4 @@
-import { createHttpClient, createWebSocketClient } from "@purevm/rpc";
+import { createHttpClient, createWebSocketClient } from "@purevm/public";
 
 import { BlockState } from "./block-state.js";
 import { parseBlockHeader } from "./block.js";
@@ -15,36 +15,54 @@ import type {
 import { assertNonNegativeInteger, assertPositiveInteger, toError } from "./utils.js";
 import { WebSocketSession } from "./websocket-session.js";
 
+const DEFAULT_HISTORY_SIZE = 128;
+
 const defaultClientFactory: NewBlocksClientFactory = {
   createHttp: (options) => createHttpClient(options),
   createWebSocket: (options) => createWebSocketClient(options),
 };
 
+/**
+ * Follows the latest block header of a chain. WebSocket `newHeads` is the fast path. When no newer
+ * header arrives for `polling.staleAfterMs`, the socket is replaced and HTTP polling runs until the
+ * new subscription catches up. Every header is classified against the emitted ones: duplicates are
+ * dropped, skipped heights are reported as `gap` (never fetched), and branch switches as `reorg`.
+ */
 export class NewBlocks {
   private activeSessionId = 0;
   private lifecycleId = 0;
   private nextSessionId = 0;
-  private poller?: LatestBlockPoller;
+  private poller?: LatestBlockPoller | undefined;
   private reconnectAttempt = 0;
-  private reconnectTimer?: ReturnType<typeof setTimeout>;
+  private reconnectTimer?: ReturnType<typeof setTimeout> | undefined;
   private running = false;
-  private session?: WebSocketSession;
-  private readonly state = new BlockState();
-  private startPromise?: Promise<void>;
+  private session?: WebSocketSession | undefined;
+  private readonly state: BlockState;
+  private startPromise?: Promise<void> | undefined;
+  private readonly pollIntervalMs: number;
+  private readonly options: NewBlocksOptions;
+  private readonly clients: NewBlocksClientFactory;
 
-  constructor(
-    private readonly options: NewBlocksOptions,
-    private readonly clients: NewBlocksClientFactory = defaultClientFactory,
-  ) {
-    assertPositiveInteger(options.heartbeat.intervalMs, "Heartbeat interval");
-    assertPositiveInteger(options.heartbeat.timeoutMs, "Heartbeat timeout");
-    assertPositiveInteger(options.polling.intervalMs, "Polling interval");
+  constructor(options: NewBlocksOptions, clients: NewBlocksClientFactory = defaultClientFactory) {
+    this.options = options;
+    this.clients = clients;
+    this.pollIntervalMs = options.polling.intervalMs ?? options.polling.staleAfterMs;
+    const historySize = options.historySize ?? DEFAULT_HISTORY_SIZE;
+
     assertPositiveInteger(options.polling.staleAfterMs, "WebSocket stale timeout");
+    assertPositiveInteger(this.pollIntervalMs, "Polling interval");
+    assertPositiveInteger(historySize, "History size");
     assertNonNegativeInteger(options.reconnect.minDelayMs, "Minimum reconnect delay");
     assertNonNegativeInteger(options.reconnect.maxDelayMs, "Maximum reconnect delay");
     if (options.reconnect.maxDelayMs < options.reconnect.minDelayMs) {
       throw new Error("Maximum reconnect delay must be greater than or equal to minimum delay");
     }
+    this.state = new BlockState(historySize);
+  }
+
+  /** Header of the last emitted block. */
+  get head(): BlockHeader | undefined {
+    return this.state.head;
   }
 
   async start(): Promise<void> {
@@ -61,8 +79,8 @@ export class NewBlocks {
       const http = this.clients.createHttp(this.options.http);
       this.poller = new LatestBlockPoller({
         client: http,
-        intervalMs: this.options.polling.intervalMs,
-        onBlock: (block) => this.handleHttpBlock(block),
+        intervalMs: this.pollIntervalMs,
+        onBlock: (block) => this.handleHttpBlock(block, lifecycleId),
         onError: (error) => this.reportError(error),
       });
     } catch (cause) {
@@ -103,7 +121,7 @@ export class NewBlocks {
     }
 
     const starting = this.startPromise;
-    if (starting) await starting;
+    if (starting) await starting.catch(() => undefined);
     this.poller = undefined;
     this.state.clear();
     this.log("stopped");
@@ -118,9 +136,8 @@ export class NewBlocks {
 
     const session = new WebSocketSession({
       createClient: (options) => this.clients.createWebSocket(options),
-      heartbeat: this.options.heartbeat,
       onFailure: (error) => this.handleWebSocketFailure(sessionId, error),
-      onHead: (head) => this.handleWebSocketBlock(head, sessionId),
+      onHead: (head) => this.handleWebSocketHead(head, sessionId, lifecycleId),
       staleAfterMs: this.options.polling.staleAfterMs,
       websocket: this.options.websocket,
     });
@@ -138,40 +155,81 @@ export class NewBlocks {
     }
   }
 
-  private handleWebSocketBlock(value: RpcBlockHeader, sessionId: number): boolean {
-    if (!this.isCurrentSession(this.lifecycleId, sessionId)) return false;
+  /**
+   * Handles a WebSocket header. Returns true when it is at least as high as the emitted head, which
+   * proves the subscription is current and ends fallback polling.
+   */
+  private handleWebSocketHead(
+    value: RpcBlockHeader,
+    sessionId: number,
+    lifecycleId: number,
+  ): boolean {
+    if (!this.isCurrentSession(lifecycleId, sessionId)) return false;
 
     const block = parseBlockHeader(value);
-    const status = this.handleBlock(block, "websocket");
-    if (status === "old") return false;
+    const head = this.state.head;
+    this.process(block, "websocket");
+    if (head && block.number < head.number) return false;
 
     this.reconnectAttempt = 0;
     this.stopPolling();
     return true;
   }
 
-  private handleHttpBlock(value: RpcLatestBlock): void {
-    if (!this.running) return;
+  private handleHttpBlock(value: RpcLatestBlock, lifecycleId: number): void {
+    if (!this.isCurrentLifecycle(lifecycleId)) return;
     try {
-      this.handleBlock(parseBlockHeader(value), "http");
+      this.process(parseBlockHeader(value), "http");
     } catch (cause) {
-      this.reportError(toError(cause, "Invalid HTTP block header"));
+      this.reportError(toError(cause, "Invalid http block header"));
     }
   }
 
-  private handleBlock(block: BlockHeader, source: BlockSource): "accepted" | "duplicate" | "old" {
-    const result = this.state.update(block, source);
-    if (result.status !== "accepted") {
-      this.log(`ignored ${result.status} ${source} block ${block.number}`);
-      return result.status;
+  private process(block: BlockHeader, source: BlockSource): void {
+    const previous = this.state.head;
+    if (!previous) {
+      this.state.accept(block);
+      this.dispatch({ block, source, type: "block" });
+      return;
     }
 
-    this.logEvent(result.event);
-    this.dispatch(result.event);
-    return result.status;
+    const relation = this.state.relation(block);
+    switch (relation) {
+      case "duplicate":
+      case "stale":
+        this.log(`ignored ${relation} ${source} block ${block.number}`);
+        return;
+      case "next":
+        this.state.accept(block);
+        this.dispatch({ block, previous, source, type: "block" });
+        return;
+      case "replacement": {
+        const replaced = this.state.at(block.number);
+        this.state.accept(block);
+        this.dispatch({ block, kind: "replacement", previous, replaced, source, type: "reorg" });
+        return;
+      }
+      case "parent-mismatch":
+        this.state.accept(block);
+        this.dispatch({ block, kind: "parent-mismatch", previous, source, type: "reorg" });
+        return;
+      case "gap": {
+        const from = previous.number + 1n;
+        const to = block.number - 1n;
+        this.state.accept(block);
+        this.dispatch({
+          block,
+          missing: { count: to - from + 1n, from, to },
+          previous,
+          source,
+          type: "gap",
+        });
+      }
+    }
   }
 
   private dispatch(event: NewBlocksEvent): void {
+    this.logEvent(event);
     try {
       this.options.onEvent(event);
     } catch (cause) {
@@ -182,15 +240,13 @@ export class NewBlocks {
   private logEvent(event: NewBlocksEvent): void {
     if (event.type === "gap") {
       this.log(
-        `gap detected before block ${event.block.number}: missing ${event.missing.from}-${event.missing.to}`,
+        `gap before block ${event.block.number}: missing ${event.missing.from}-${event.missing.to}`,
       );
-      return;
+    } else if (event.type === "reorg") {
+      this.log(`reorg at block ${event.block.number}: ${event.kind}`);
+    } else {
+      this.log(`block ${event.block.number} received from ${event.source}`);
     }
-    if (event.type === "reorg") {
-      this.log(`reorg detected at block ${event.block.number}: ${event.kind}`);
-      return;
-    }
-    this.log(`block ${event.block.number} received from ${event.source}`);
   }
 
   private handleWebSocketFailure(sessionId: number, error: Error): void {

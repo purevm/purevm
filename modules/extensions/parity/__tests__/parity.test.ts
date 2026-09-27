@@ -9,7 +9,7 @@ import type {
   TraceRewardEntry,
   TraceSuicideEntry,
   TransactionHash,
-} from "@purevm/rpc";
+} from "@purevm/public";
 import { describe, expect, it, vi } from "vitest";
 
 import { NULL_TRANSACTION_HASH } from "../../constants.js";
@@ -96,7 +96,7 @@ describe("parity trace extensions", () => {
 
     const result = await getBlockParityTracesByNumber(client, BLOCK_NUMBER, options);
 
-    expect(traceBlockByNumber).toHaveBeenCalledWith(BLOCK_NUMBER, options);
+    expect(traceBlockByNumber).toHaveBeenCalledWith({ blockNumber: BLOCK_NUMBER }, options);
     expect(result.blockHash).toBe(LOWER_BLOCK_HASH);
     expect(result.traces[LOWER_TX_HASH]).toEqual([
       {
@@ -146,7 +146,7 @@ describe("parity trace extensions", () => {
 
     const result = await getBlockParityTracesByHash(client, UPPER_BLOCK_HASH, options);
 
-    expect(traceBlockByHash).toHaveBeenCalledWith(UPPER_BLOCK_HASH, options);
+    expect(traceBlockByHash).toHaveBeenCalledWith({ blockHash: UPPER_BLOCK_HASH }, options);
     expect(result).toEqual({ blockHash: LOWER_BLOCK_HASH, traces: {} });
   });
 
@@ -163,7 +163,7 @@ describe("parity trace extensions", () => {
       blockHash: null,
       traces: {},
     });
-    expect(traceBlockByTag).toHaveBeenCalledWith("pending", options);
+    expect(traceBlockByTag).toHaveBeenCalledWith({ blockTag: "pending" }, options);
   });
 
   it("rejects inconsistent block hashes", async () => {

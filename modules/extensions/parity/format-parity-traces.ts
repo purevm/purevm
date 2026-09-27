@@ -1,4 +1,4 @@
-import type { BlockHash, TraceEntry, TransactionHash } from "@purevm/rpc";
+import type { BlockHash, TraceEntry, TransactionHash } from "@purevm/public";
 
 import { NULL_TRANSACTION_HASH } from "../constants.js";
 import { ExtensionDataError } from "../errors/index.js";

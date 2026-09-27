@@ -5,7 +5,7 @@ import {
   type BlockTag,
   type HttpClient,
   type HttpRequestOptions,
-} from "@purevm/rpc";
+} from "@purevm/public";
 
 import { getBlockByTag } from "../block/getBlockByTag.js";
 import { ExtensionDataError } from "../errors/index.js";

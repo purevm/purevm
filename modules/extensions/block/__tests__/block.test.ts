@@ -7,7 +7,7 @@ import type {
   RpcBlock,
   RpcTransaction,
   TransactionHash,
-} from "@purevm/rpc";
+} from "@purevm/public";
 import { describe, expect, it, vi } from "vitest";
 
 import { ExtensionDataError } from "../../errors/index.js";

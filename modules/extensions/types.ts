@@ -8,7 +8,7 @@ import type {
   RpcTransactionReceipt,
   TraceRewardType,
   TransactionHash,
-} from "@purevm/rpc";
+} from "@purevm/public";
 
 export type Block = Omit<RpcBlock<true>, "transactions">;
 export type TransactionsByHash = Record<TransactionHash, RpcTransaction>;
@@ -26,7 +26,7 @@ export type ReceiptsResult = {
 type TraceBase = {
   /** Effective execution error, or null when this trace and its ancestors succeeded. */
   error: string | null;
-  path: number[];
+  path: readonly number[];
 };
 
 export type CallTrace = TraceBase & {

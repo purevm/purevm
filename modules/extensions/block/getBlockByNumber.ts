@@ -1,4 +1,4 @@
-import type { BlockNumber, HttpClient, HttpRequestOptions } from "@purevm/rpc";
+import type { BlockNumber, HttpClient, HttpRequestOptions } from "@purevm/public";
 
 import type { BlockResult } from "../types.js";
 import { formatBlock } from "./format-block.js";

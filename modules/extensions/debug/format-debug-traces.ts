@@ -1,4 +1,4 @@
-import type { DebugBlockTrace, DebugCallFrame } from "@purevm/rpc";
+import type { DebugBlockTrace, DebugCallFrame } from "@purevm/public";
 
 import { ExtensionDataError } from "../errors/index.js";
 import type { Trace, TracesResult } from "../types.js";
@@ -12,6 +12,11 @@ export function formatDebugTraces(response: readonly DebugBlockTrace[]): TracesR
     if (Object.hasOwn(traces, transactionHash)) {
       throw new ExtensionDataError(
         `Debug traces contain duplicate transaction hash ${transactionHash}`,
+      );
+    }
+    if (transaction.result === undefined) {
+      throw new ExtensionDataError(
+        `Debug tracer failed for transaction ${transactionHash}: ${transaction.error}`,
       );
     }
     traces[transactionHash] = flattenFrame(transaction.result, [], null);

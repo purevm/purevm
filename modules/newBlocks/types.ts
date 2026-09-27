@@ -4,66 +4,68 @@ import type {
   HttpTransportOptions,
   NewHeadsSubscriptionResult,
   Quantity,
-  RequestOptions,
   RpcBlock,
   RpcSubscription,
   SubscriptionHandlers,
   WebSocketTransportOptions,
-} from "@purevm/rpc";
+} from "@purevm/public";
 
+/** Where a header came from: the subscription or the HTTP fallback poll. */
 export type BlockSource = "http" | "websocket";
 
-/** Minimal canonical header retained by the stream. */
+/** Canonical header retained and emitted by the stream. */
 export type BlockHeader = {
   hash: BlockHash;
   number: bigint;
   numberHex: BlockNumber;
   parentHash: BlockHash;
+  /** Unix milliseconds at which the header was received. */
   receivedAt: number;
   timestamp: bigint;
   timestampHex: Quantity;
 };
 
+/** The first header, or the next height extending the previous header. */
 export type BlockEvent = {
   block: BlockHeader;
-  previous?: BlockHeader;
+  previous?: BlockHeader | undefined;
   source: BlockSource;
   type: "block";
 };
 
+/**
+ * The chain switched branch. `replacement`: a height already emitted arrived with another hash
+ * (`replaced` is the header emitted before at that height). `parent-mismatch`: the next height
+ * does not extend `previous`.
+ */
+export type ReorgEvent = {
+  block: BlockHeader;
+  kind: "parent-mismatch" | "replacement";
+  previous: BlockHeader;
+  replaced?: BlockHeader | undefined;
+  source: BlockSource;
+  type: "reorg";
+};
+
+/**
+ * `block` is newer than the next height: the heights in `missing` were never seen. They are not
+ * fetched; request them with `eth_getBlockByNumber` if every block is needed.
+ */
 export type GapEvent = {
   block: BlockHeader;
-  missing: {
-    count: bigint;
-    from: bigint;
-    to: bigint;
-  };
+  missing: { count: bigint; from: bigint; to: bigint };
   previous: BlockHeader;
   source: BlockSource;
   type: "gap";
 };
 
-export type ReorgEvent = {
-  block: BlockHeader;
-  kind: "parent-mismatch" | "replacement";
-  previous: BlockHeader;
-  source: BlockSource;
-  type: "reorg";
-};
-
 export type NewBlocksEvent = BlockEvent | GapEvent | ReorgEvent;
 
-export type HeartbeatOptions = {
-  intervalMs: number;
-  method: "eth_blockNumber" | "net_version";
-  timeoutMs: number;
-};
-
 export type PollingOptions = {
-  /** Maximum silence before WebSocket is considered stale and HTTP polling starts. */
+  /** Silence, without a newer WebSocket header, after which HTTP polling starts. */
   staleAfterMs: number;
-  /** Delay between latest-block requests while fallback polling is active. */
-  intervalMs: number;
+  /** Delay between HTTP latest-block requests while polling. Defaults to `staleAfterMs`. */
+  intervalMs?: number | undefined;
 };
 
 export type ReconnectOptions = {
@@ -74,15 +76,17 @@ export type ReconnectOptions = {
 };
 
 export type NewBlocksOptions = {
-  heartbeat: HeartbeatOptions;
+  /** HTTP endpoint used for fallback polling. It may differ from the WebSocket one. */
   http: HttpTransportOptions;
+  /** Recent headers remembered to tell duplicates from replacements. Defaults to `128`. */
+  historySize?: number | undefined;
   onError: (error: Error) => void;
   onEvent: (event: NewBlocksEvent) => void;
-  onLog?: (message: string) => void;
+  onLog?: ((message: string) => void) | undefined;
   polling: PollingOptions;
   reconnect: ReconnectOptions;
-  /** Retry and reconnect behavior are owned by this module. */
-  websocket: Omit<WebSocketTransportOptions, "onError" | "retry">;
+  /** Reconnection and retries are owned by this module; set `heartbeat` here to tune liveness. */
+  websocket: Omit<WebSocketTransportOptions, "onError" | "reconnect" | "retry">;
 };
 
 /** @internal */
@@ -95,19 +99,17 @@ export type RpcBlockHeader = Pick<
 export type RpcLatestBlock = Pick<RpcBlock<false>, "hash" | "number" | "parentHash" | "timestamp">;
 
 /** @internal */
-export interface NewBlocksHttpClient {
+export type NewBlocksHttpClient = {
   ethGetBlockByTag(parameters: { blockTag: "latest" }): Promise<RpcLatestBlock | null>;
-}
+};
 
 /** @internal */
-export interface NewBlocksWebSocketClient {
+export type NewBlocksWebSocketClient = {
   close(): void;
-  ethBlockNumber(options?: RequestOptions): Promise<Quantity>;
   ethSubscribeNewHeads(
     handlers: SubscriptionHandlers<NewHeadsSubscriptionResult>,
   ): Promise<RpcSubscription>;
-  netVersion(options?: RequestOptions): Promise<string>;
-}
+};
 
 /** @internal */
 export type NewBlocksClientFactory = {

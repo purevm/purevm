@@ -1,4 +1,4 @@
-import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/rpc";
+import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/public";
 
 import type { TracesResult } from "../types.js";
 import { formatDebugTraces } from "./format-debug-traces.js";
@@ -9,6 +9,6 @@ export async function getBlockDebugTracesByTag(
   options?: HttpRequestOptions,
 ): Promise<TracesResult> {
   return formatDebugTraces(
-    await client.debugTraceBlockByTag(blockTag, { tracer: "callTracer" }, options),
+    await client.debugTraceBlockByTag({ blockTag, config: { tracer: "callTracer" } }, options),
   );
 }

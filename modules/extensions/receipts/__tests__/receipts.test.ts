@@ -5,7 +5,7 @@ import type {
   HttpRequestOptions,
   RpcTransactionReceipt,
   TransactionHash,
-} from "@purevm/rpc";
+} from "@purevm/public";
 import { describe, expect, it, vi } from "vitest";
 
 import { ExtensionDataError } from "../../errors/index.js";
@@ -29,7 +29,10 @@ describe("receipt extensions", () => {
 
     const result = await getBlockReceiptsByNumber(client, BLOCK_NUMBER, options);
 
-    expect(ethGetBlockReceiptsByNumber).toHaveBeenCalledWith(BLOCK_NUMBER, options);
+    expect(ethGetBlockReceiptsByNumber).toHaveBeenCalledWith(
+      { blockNumber: BLOCK_NUMBER },
+      options,
+    );
     expect(result.receipts).toEqual({ [LOWER_HASH]: receipt });
   });
 
@@ -44,8 +47,8 @@ describe("receipt extensions", () => {
     await getBlockReceiptsByHash(client, BLOCK_HASH, options);
     await getBlockReceiptsByTag(client, "safe", options);
 
-    expect(ethGetBlockReceiptsByHash).toHaveBeenCalledWith(BLOCK_HASH, options);
-    expect(ethGetBlockReceiptsByTag).toHaveBeenCalledWith("safe", options);
+    expect(ethGetBlockReceiptsByHash).toHaveBeenCalledWith({ blockHash: BLOCK_HASH }, options);
+    expect(ethGetBlockReceiptsByTag).toHaveBeenCalledWith({ blockTag: "safe" }, options);
   });
 
   it("rejects missing and duplicate receipts", async () => {

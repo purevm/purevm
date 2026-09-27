@@ -5,30 +5,36 @@ import {
   type WebSocketFactory,
   type WebSocketLike,
   type WebSocketTransportOptions,
-} from "@purevm/rpc";
+} from "@purevm/public";
 
-import type { HeartbeatOptions, NewBlocksWebSocketClient, RpcBlockHeader } from "./types.js";
+import type { NewBlocksOptions, NewBlocksWebSocketClient, RpcBlockHeader } from "./types.js";
 import { toError } from "./utils.js";
 
 export type WebSocketSessionOptions = {
   createClient: (options: WebSocketTransportOptions) => NewBlocksWebSocketClient;
-  heartbeat: HeartbeatOptions;
   onFailure: (error: Error) => void;
-  /** Returns true only when the header is current enough to prove subscription health. */
+  /** Returns true when the header is recent enough to prove the subscription is alive. */
   onHead: (head: RpcBlockHeader) => boolean;
   staleAfterMs: number;
-  websocket: Omit<WebSocketTransportOptions, "onError" | "retry">;
+  websocket: NewBlocksOptions["websocket"];
 };
 
+/**
+ * One WebSocket connection with one `newHeads` subscription. It fails once, on the first socket
+ * close, transport error, subscription error, or `staleAfterMs` without a current header. Liveness
+ * of an idle socket is checked by the transport heartbeat.
+ */
 export class WebSocketSession {
   private active = false;
-  private client?: NewBlocksWebSocketClient;
+  private client?: NewBlocksWebSocketClient | undefined;
   private failed = false;
-  private heartbeatTimer?: ReturnType<typeof setTimeout>;
-  private staleTimer?: ReturnType<typeof setTimeout>;
-  private subscription?: RpcSubscription;
+  private staleTimer?: ReturnType<typeof setTimeout> | undefined;
+  private subscription?: RpcSubscription | undefined;
+  private readonly options: WebSocketSessionOptions;
 
-  constructor(private readonly options: WebSocketSessionOptions) {}
+  constructor(options: WebSocketSessionOptions) {
+    this.options = options;
+  }
 
   async start(): Promise<void> {
     if (this.active) return;
@@ -50,7 +56,6 @@ export class WebSocketSession {
 
       this.subscription = subscription;
       this.resetStaleTimer();
-      this.scheduleHeartbeat();
     } catch (cause) {
       const error = toError(cause, "Failed to connect and subscribe to new heads");
       this.fail(error);
@@ -62,7 +67,7 @@ export class WebSocketSession {
     if (!this.active && !this.client && !this.subscription) return;
 
     this.active = false;
-    this.clearTimers();
+    this.clearStaleTimer();
     const client = this.client;
     const subscription = this.subscription;
     this.client = undefined;
@@ -77,7 +82,7 @@ export class WebSocketSession {
 
   close(): void {
     this.active = false;
-    this.clearTimers();
+    this.clearStaleTimer();
     const client = this.client;
     this.client = undefined;
     this.subscription = undefined;
@@ -98,6 +103,7 @@ export class WebSocketSession {
       ...this.options.websocket,
       createWebSocket,
       onError: (error) => this.fail(error),
+      reconnect: false,
       retry: false,
     };
   }
@@ -111,53 +117,18 @@ export class WebSocketSession {
     }
   }
 
-  private scheduleHeartbeat(): void {
-    this.clearHeartbeatTimer();
-    this.heartbeatTimer = setTimeout(
-      () => void this.runHeartbeat(),
-      this.options.heartbeat.intervalMs,
-    );
-  }
-
-  private async runHeartbeat(): Promise<void> {
-    const client = this.client;
-    if (!this.active || this.failed || !client) return;
-
-    try {
-      const requestOptions = { timeoutMs: this.options.heartbeat.timeoutMs };
-      if (this.options.heartbeat.method === "eth_blockNumber") {
-        await client.ethBlockNumber(requestOptions);
-      } else {
-        await client.netVersion(requestOptions);
-      }
-      if (this.active && !this.failed) this.scheduleHeartbeat();
-    } catch (cause) {
-      this.fail(toError(cause, "WebSocket heartbeat failed"));
-    }
-  }
-
   private resetStaleTimer(): void {
     this.clearStaleTimer();
     this.staleTimer = setTimeout(() => {
-      this.fail(new Error(`No WebSocket block received for ${this.options.staleAfterMs}ms`));
+      this.fail(new Error(`No new WebSocket block received for ${this.options.staleAfterMs}ms`));
     }, this.options.staleAfterMs);
   }
 
   private fail(error: Error): void {
     if (!this.active || this.failed) return;
     this.failed = true;
-    this.clearTimers();
-    this.options.onFailure(error);
-  }
-
-  private clearTimers(): void {
-    this.clearHeartbeatTimer();
     this.clearStaleTimer();
-  }
-
-  private clearHeartbeatTimer(): void {
-    if (this.heartbeatTimer) clearTimeout(this.heartbeatTimer);
-    this.heartbeatTimer = undefined;
+    this.options.onFailure(error);
   }
 
   private clearStaleTimer(): void {

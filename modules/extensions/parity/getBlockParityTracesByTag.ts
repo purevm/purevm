@@ -1,4 +1,4 @@
-import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/rpc";
+import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/public";
 
 import type { ParityBlockTracesResult } from "../types.js";
 import { formatParityTraces } from "./format-parity-traces.js";
@@ -8,5 +8,5 @@ export async function getBlockParityTracesByTag(
   blockTag: BlockTag,
   options?: HttpRequestOptions,
 ): Promise<ParityBlockTracesResult> {
-  return formatParityTraces(await client.traceBlockByTag(blockTag, options));
+  return formatParityTraces(await client.traceBlockByTag({ blockTag }, options));
 }

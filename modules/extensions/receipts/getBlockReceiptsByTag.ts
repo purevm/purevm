@@ -1,4 +1,4 @@
-import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/rpc";
+import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/public";
 
 import type { ReceiptsResult } from "../types.js";
 import { formatReceipts } from "./format-receipts.js";
@@ -9,7 +9,7 @@ export async function getBlockReceiptsByTag(
   options?: HttpRequestOptions,
 ): Promise<ReceiptsResult> {
   return formatReceipts(
-    await client.ethGetBlockReceiptsByTag(blockTag, options),
+    await client.ethGetBlockReceiptsByTag({ blockTag }, options),
     `tag ${blockTag}`,
   );
 }

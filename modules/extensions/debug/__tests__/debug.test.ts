@@ -6,7 +6,7 @@ import type {
   HttpClient,
   HttpRequestOptions,
   TransactionHash,
-} from "@purevm/rpc";
+} from "@purevm/public";
 import { describe, expect, it, vi } from "vitest";
 
 import { getBlockDebugTracesByHash } from "../getBlockDebugTracesByHash.js";
@@ -49,8 +49,7 @@ describe("debug trace extensions", () => {
     const result = await getBlockDebugTracesByNumber(client, BLOCK_NUMBER, options);
 
     expect(client.debugTraceBlockByNumber).toHaveBeenCalledWith(
-      BLOCK_NUMBER,
-      { tracer: "callTracer" },
+      { blockNumber: BLOCK_NUMBER, config: { tracer: "callTracer" } },
       options,
     );
     expect(result.traces[LOWER_HASH]).toEqual([
@@ -96,14 +95,24 @@ describe("debug trace extensions", () => {
     });
   });
 
+  it("rejects transactions the tracer could not process", async () => {
+    const debugTraceBlockByTag = vi
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValue([{ error: "execution timeout", txHash: UPPER_HASH }]);
+    const client = { debugTraceBlockByTag } as unknown as HttpClient;
+
+    await expect(getBlockDebugTracesByTag(client, "latest")).rejects.toThrow(
+      /Debug tracer failed for transaction 0x[0-9a-f]{64}: execution timeout/,
+    );
+  });
+
   it("delegates tag selectors and rejects malformed transaction hashes", async () => {
     const debugTraceBlockByTag = vi.fn<() => Promise<unknown>>().mockResolvedValue([]);
     const client = { debugTraceBlockByTag } as unknown as HttpClient;
 
     await getBlockDebugTracesByTag(client, "finalized", options);
     expect(debugTraceBlockByTag).toHaveBeenCalledWith(
-      "finalized",
-      { tracer: "callTracer" },
+      { blockTag: "finalized", config: { tracer: "callTracer" } },
       options,
     );
 

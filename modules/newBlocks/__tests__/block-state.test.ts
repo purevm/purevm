@@ -46,53 +46,64 @@ describe("parseBlockHeader", () => {
 });
 
 describe("BlockState", () => {
-  test("classifies blocks, replacements, parent reorgs, gaps, duplicates, and old blocks", () => {
-    const state = new BlockState();
-    const first = header(10, "a", "0");
-    const next = header(11, "b", "a");
-    const replacement = header(11, "c", "a");
-    const disconnected = header(12, "d", "f");
-    const jumped = header(15, "e", "d");
+  test("classifies first, next, duplicate, gap, and parent mismatch", () => {
+    const state = new BlockState(8);
+    expect(state.relation(header(10, "a", "0"))).toBe("first");
+    state.accept(header(10, "a", "0"));
 
-    expect(state.update(first, "http")).toEqual({
-      event: { block: first, source: "http", type: "block" },
-      status: "accepted",
-    });
-    expect(state.update(first, "websocket")).toEqual({ status: "duplicate" });
-    expect(state.update(next, "websocket")).toMatchObject({
-      event: { block: next, previous: first, type: "block" },
-      status: "accepted",
-    });
-    expect(state.update(replacement, "websocket")).toMatchObject({
-      event: { block: replacement, kind: "replacement", previous: next, type: "reorg" },
-    });
-    expect(state.update(disconnected, "websocket")).toMatchObject({
-      event: {
-        block: disconnected,
-        kind: "parent-mismatch",
-        previous: replacement,
-        type: "reorg",
-      },
-    });
-    expect(state.update(jumped, "http")).toMatchObject({
-      event: {
-        block: jumped,
-        missing: { count: 2n, from: 13n, to: 14n },
-        previous: disconnected,
-        type: "gap",
-      },
-    });
-    expect(state.update(disconnected, "websocket")).toEqual({ status: "old" });
+    expect(state.relation(header(11, "b", "a"))).toBe("next");
+    expect(state.relation(header(10, "a", "0"))).toBe("duplicate");
+    expect(state.relation(header(13, "d", "c"))).toBe("gap");
+    expect(state.relation(header(11, "b", "f"))).toBe("parent-mismatch");
   });
 
-  test("clear removes the retained head", () => {
-    const state = new BlockState();
-    const block = header(1, "a", "0");
-    state.update(block, "http");
+  test("detects replacements at the head and below it", () => {
+    const state = new BlockState(8);
+    for (const [number, character, parent] of [
+      [10, "a", "0"],
+      [11, "b", "a"],
+      [12, "c", "b"],
+    ] as const) {
+      state.accept(header(number, character, parent));
+    }
+
+    expect(state.relation(header(12, "e", "b"))).toBe("replacement");
+    expect(state.relation(header(11, "e", "a"))).toBe("replacement");
+    expect(state.relation(header(11, "b", "a"))).toBe("duplicate");
+  });
+
+  test("forgets heights above an accepted lower replacement", () => {
+    const state = new BlockState(8);
+    state.accept(header(10, "a", "0"));
+    state.accept(header(11, "b", "a"));
+    state.accept(header(12, "c", "b"));
+
+    state.accept(header(11, "e", "a"));
+
+    expect(state.head?.hash).toBe(hash("e"));
+    expect(state.at(12n)).toBeUndefined();
+    expect(state.relation(header(12, "f", "e"))).toBe("next");
+  });
+
+  test("keeps a bounded history and reports older heights as stale", () => {
+    const state = new BlockState(2);
+    state.accept(header(10, "a", "0"));
+    state.accept(header(11, "b", "a"));
+    state.accept(header(12, "c", "b"));
+
+    expect(state.at(10n)).toBeUndefined();
+    expect(state.at(11n)?.hash).toBe(hash("b"));
+    expect(state.relation(header(10, "a", "0"))).toBe("stale");
+  });
+
+  test("clear removes the head and history", () => {
+    const state = new BlockState(8);
+    state.accept(header(10, "a", "0"));
+
     state.clear();
-    expect(state.update(block, "http")).toEqual({
-      event: { block, source: "http", type: "block" },
-      status: "accepted",
-    });
+
+    expect(state.head).toBeUndefined();
+    expect(state.at(10n)).toBeUndefined();
+    expect(state.relation(header(10, "a", "0"))).toBe("first");
   });
 });

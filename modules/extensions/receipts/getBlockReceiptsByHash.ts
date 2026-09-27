@@ -1,4 +1,4 @@
-import type { BlockHash, HttpClient, HttpRequestOptions } from "@purevm/rpc";
+import type { BlockHash, HttpClient, HttpRequestOptions } from "@purevm/public";
 
 import type { ReceiptsResult } from "../types.js";
 import { formatReceipts } from "./format-receipts.js";
@@ -9,7 +9,7 @@ export async function getBlockReceiptsByHash(
   options?: HttpRequestOptions,
 ): Promise<ReceiptsResult> {
   return formatReceipts(
-    await client.ethGetBlockReceiptsByHash(blockHash, options),
+    await client.ethGetBlockReceiptsByHash({ blockHash }, options),
     `hash ${blockHash}`,
   );
 }
