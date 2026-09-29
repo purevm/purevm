@@ -17,4 +17,4 @@
 - Name unit tests `*.test.ts`. A unit test must not access real external dependencies. Use deterministic fakes for HTTP, WebSocket, timers, and other I/O boundaries.
 - Name integration tests `*.integ.ts`. An integration test accesses a real RPC or another real external service. Document its required environment variables, startup steps, command ordering, and other infrastructure requirements, including why each one is necessary.
 - Configure Vitest projects to collect `*.test.ts` as unit tests and `*.integ.ts` as integration tests.
-- Run `pnpm --filter @purevm/transports validate` or `pnpm --filter @purevm/public validate` for every affected package before considering a change complete.
+- Run `pnpm --filter @purevm/<package_name> validate` for every affected package before considering a change complete.
