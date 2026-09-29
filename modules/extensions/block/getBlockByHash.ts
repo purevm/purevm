@@ -1,4 +1,4 @@
-import type { BlockHash, HttpClient, HttpRequestOptions } from "@purevm/public";
+import type { BlockHash, HttpClient, HttpRequestOptions } from "@purevm/rpc-public";
 
 import type { BlockResult } from "../types.js";
 import { formatBlock } from "./format-block.js";

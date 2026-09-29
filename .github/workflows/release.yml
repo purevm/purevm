@@ -35,9 +35,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm --filter @purevm/transports validate
+      - run: pnpm --filter @purevm/rpc-transport validate
 
-      - run: pnpm --filter @purevm/public validate
+      - run: pnpm --filter @purevm/rpc-public validate
 
       # With pending changesets this opens a "version packages" pull request. Once that pull
       # request is merged, it publishes every package version missing from npm.

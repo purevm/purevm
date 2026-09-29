@@ -1,4 +1,4 @@
-import type { BlockHash, BlockNumber, Quantity } from "@purevm/public";
+import type { BlockHash, BlockNumber, Quantity } from "@purevm/rpc-public";
 
 import type { BlockHeader, RpcBlockHeader, RpcLatestBlock } from "./types.js";
 

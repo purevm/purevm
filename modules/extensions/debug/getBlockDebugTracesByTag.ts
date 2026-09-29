@@ -1,4 +1,4 @@
-import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/public";
+import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/rpc-public";
 
 import type { TracesResult } from "../types.js";
 import { formatDebugTraces } from "./format-debug-traces.js";

@@ -1,4 +1,4 @@
-import type { HttpClient } from "@purevm/public";
+import type { HttpClient } from "@purevm/rpc-public";
 
 import { assembleBlocks } from "./assemble-blocks.js";
 import { fetchBlocksByNumber } from "./block.request.js";

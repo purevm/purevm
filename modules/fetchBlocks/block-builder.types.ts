@@ -1,4 +1,4 @@
-import type { BlockHash, TraceRewardEntry } from "@purevm/public";
+import type { BlockHash, TraceRewardEntry } from "@purevm/rpc-public";
 
 import type { BlockData, FetchedTransaction } from "./types.js";
 

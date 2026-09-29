@@ -1,4 +1,4 @@
-import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/public";
+import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/rpc-public";
 
 import type { ParityBlockTracesResult } from "../types.js";
 import { formatParityTraces } from "./format-parity-traces.js";

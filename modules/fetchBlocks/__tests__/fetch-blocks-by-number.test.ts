@@ -1,4 +1,4 @@
-import type { EthGetBlockByNumberParameters, HttpRequestOptions, RpcBlock } from "@purevm/public";
+import type { EthGetBlockByNumberParameters, HttpRequestOptions, RpcBlock } from "@purevm/rpc-public";
 import { describe, expect, test, vi } from "vitest";
 
 import { fetchBlocksByNumber } from "../block.request.js";

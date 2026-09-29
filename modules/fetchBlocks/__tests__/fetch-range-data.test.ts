@@ -7,7 +7,7 @@ import {
   type RpcLog,
   type TraceEntry,
   type TraceFilterParameters,
-} from "@purevm/public";
+} from "@purevm/rpc-public";
 import { describe, expect, test, vi } from "vitest";
 
 import { fetchLogsRange } from "../logs.request.js";

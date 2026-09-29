@@ -1,4 +1,4 @@
-import { HttpStatusError, RpcProviderError, RpcTimeoutError } from "@purevm/public";
+import { HttpStatusError, RpcProviderError, RpcTimeoutError } from "@purevm/rpc-public";
 
 // Rate limiting reuses words such as "limit" and "exceeded" (Infura even shares code -32005), so it
 // is recognized first: splitting a rate-limited range would multiply requests instead of helping.

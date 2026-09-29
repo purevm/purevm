@@ -1,4 +1,4 @@
-import type { DebugBlockTrace, DebugCallFrame } from "@purevm/public";
+import type { DebugBlockTrace, DebugCallFrame } from "@purevm/rpc-public";
 
 import { ExtensionDataError } from "../errors/index.js";
 import type { Trace, TracesResult } from "../types.js";

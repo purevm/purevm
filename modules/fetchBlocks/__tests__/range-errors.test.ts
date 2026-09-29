@@ -3,7 +3,7 @@ import {
   RpcNetworkError,
   RpcProviderError,
   RpcTimeoutError,
-} from "@purevm/public";
+} from "@purevm/rpc-public";
 import { expect, test } from "vitest";
 
 import { isRangeTooLargeError } from "../range-errors.js";

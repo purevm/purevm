@@ -8,7 +8,7 @@ import type {
   RpcSubscription,
   SubscriptionHandlers,
   WebSocketTransportOptions,
-} from "@purevm/public";
+} from "@purevm/rpc-public";
 
 /** Where a header came from: the subscription or the HTTP fallback poll. */
 export type BlockSource = "http" | "websocket";

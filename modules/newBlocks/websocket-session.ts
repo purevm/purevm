@@ -5,7 +5,7 @@ import {
   type WebSocketFactory,
   type WebSocketLike,
   type WebSocketTransportOptions,
-} from "@purevm/public";
+} from "@purevm/rpc-public";
 
 import type { NewBlocksOptions, NewBlocksWebSocketClient, RpcBlockHeader } from "./types.js";
 import { toError } from "./utils.js";

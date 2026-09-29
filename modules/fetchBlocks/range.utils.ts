@@ -1,4 +1,4 @@
-import type { BlockNumber } from "@purevm/public";
+import type { BlockNumber } from "@purevm/rpc-public";
 
 import { FetchBlocksDataError } from "./FetchBlocksDataError.js";
 

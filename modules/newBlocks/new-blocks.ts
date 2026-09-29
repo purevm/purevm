@@ -1,4 +1,4 @@
-import { createHttpClient, createWebSocketClient } from "@purevm/public";
+import { createHttpClient, createWebSocketClient } from "@purevm/rpc-public";
 
 import { BlockState } from "./block-state.js";
 import { parseBlockHeader } from "./block.js";

@@ -91,8 +91,8 @@ reconnection or while polling HTTP slower than the block time, a `gap` event rep
 stream continues from the new head. Fetch them yourself when every block matters:
 
 ```ts
-import { createHttpClient } from "@purevm/public";
-import { toQuantity } from "@purevm/public/utils";
+import { createHttpClient } from "@purevm/rpc-public";
+import { toQuantity } from "@purevm/rpc-public/utils";
 
 const client = createHttpClient({ url: "https://base-rpc.publicnode.com" });
 

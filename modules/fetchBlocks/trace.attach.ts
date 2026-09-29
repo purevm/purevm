@@ -1,4 +1,4 @@
-import type { TraceEntry } from "@purevm/public";
+import type { TraceEntry } from "@purevm/rpc-public";
 
 import type { BlockBuilder } from "./block-builder.types.js";
 import { FetchBlocksDataError } from "./FetchBlocksDataError.js";

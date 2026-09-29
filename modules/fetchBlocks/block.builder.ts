@@ -1,4 +1,4 @@
-import type { RpcBlock, TransactionHash } from "@purevm/public";
+import type { RpcBlock, TransactionHash } from "@purevm/rpc-public";
 
 import type { BlockBuilder } from "./block-builder.types.js";
 import { FetchBlocksDataError } from "./FetchBlocksDataError.js";

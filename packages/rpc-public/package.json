@@ -1,0 +1,86 @@
+{
+    "name": "@purevm/rpc-public",
+    "version": "0.1.0",
+    "description": "Typed read-only public actions for EVM chains over HTTP and WebSocket.",
+    "keywords": [
+        "debug",
+        "ethereum",
+        "evm",
+        "json-rpc",
+        "public-actions",
+        "rpc",
+        "trace",
+        "typescript",
+        "websocket"
+    ],
+    "homepage": "https://github.com/yog4a/purevm/tree/main/packages/rpc-public#readme",
+    "bugs": {
+        "url": "https://github.com/yog4a/purevm/issues"
+    },
+    "license": "SEE LICENSE IN LICENSE.md",
+    "author": "Yog4a",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/purevm/purevm.git",
+        "directory": "packages/rpc-public"
+    },
+    "files": [
+        "dist",
+        "LICENSE.md",
+        "README.md"
+    ],
+    "type": "module",
+    "sideEffects": false,
+    "main": "./dist/index.mjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.mts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.mts",
+            "import": "./dist/index.mjs",
+            "default": "./dist/index.mjs"
+        },
+        "./utils": {
+            "types": "./dist/utils.d.mts",
+            "import": "./dist/utils.mjs",
+            "default": "./dist/utils.mjs"
+        },
+        "./package.json": "./package.json"
+    },
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    },
+    "scripts": {
+        "build": "tsdown",
+        "check": "pnpm lint && pnpm format:check && pnpm typecheck",
+        "check:fix": "pnpm format && pnpm lint:fix",
+        "dev": "tsdown --watch",
+        "format": "oxfmt .",
+        "format:check": "oxfmt --check .",
+        "lint": "oxlint --deny-warnings --report-unused-disable-directives .",
+        "lint:fix": "oxlint --fix --deny-warnings --report-unused-disable-directives .",
+        "pack:check": "pnpm build && npm pack --dry-run --ignore-scripts",
+        "prepack": "pnpm build",
+        "test": "vitest run --project unit",
+        "test:integ": "vitest run --project integration",
+        "test:coverage": "vitest run --project unit --coverage",
+        "test:watch": "vitest --project unit",
+        "typecheck": "tsc --noEmit",
+        "validate": "pnpm check && pnpm test && pnpm build"
+    },
+    "dependencies": {
+        "@purevm/rpc-transport": "^0.2.0"
+    },
+    "devDependencies": {
+        "@types/node": "^26.4.0",
+        "@vitest/coverage-v8": "^4.1.11",
+        "publint": "^0.3.24",
+        "tsdown": "^0.22.14",
+        "typescript": "^7.0.2",
+        "vitest": "^4.1.11"
+    },
+    "engines": {
+        "node": ">=22.18.0"
+    }
+}

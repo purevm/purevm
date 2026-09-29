@@ -6,7 +6,7 @@ import type {
   HttpClient,
   HttpRequestOptions,
   TransactionHash,
-} from "@purevm/public";
+} from "@purevm/rpc-public";
 import { describe, expect, it, vi } from "vitest";
 
 import { getBlockDebugTracesByHash } from "../getBlockDebugTracesByHash.js";

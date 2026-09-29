@@ -29,7 +29,7 @@ never combined.
 ## Usage
 
 ```ts
-import { createHttpClient } from "@purevm/public";
+import { createHttpClient } from "@purevm/rpc-public";
 
 import { fetchBlocks } from "./modules/fetchBlocks/index.js";
 

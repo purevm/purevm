@@ -3,7 +3,7 @@ import type {
   HttpRequestOptions,
   TraceEntry,
   TraceFilterParameters,
-} from "@purevm/public";
+} from "@purevm/rpc-public";
 
 import { ExtensionDataError } from "../errors/index.js";
 import type { ParityBlocksTracesResult } from "../types.js";

@@ -1,6 +1,6 @@
 # RPC extensions
 
-Small data-fetching helpers built on `@purevm/public`'s `HttpClient`. They normalize common block data
+Small data-fetching helpers built on `@purevm/rpc-public`'s `HttpClient`. They normalize common block data
 into records keyed by lowercase transaction hash while preserving the RPC package's field types.
 
 ## Functions
@@ -16,12 +16,12 @@ into records keyed by lowercase transaction hash while preserving the RPC packag
 - `getBlocksTraces`: fetch a flexible `trace_filter` range and group traces by block number, then
   transaction hash.
 
-Only HTTP clients are accepted because `debug_*` and `trace_*` are HTTP-only in `@purevm/public`.
+Only HTTP clients are accepted because `debug_*` and `trace_*` are HTTP-only in `@purevm/rpc-public`.
 
 ## Example
 
 ```ts
-import { createHttpClient } from "@purevm/public";
+import { createHttpClient } from "@purevm/rpc-public";
 
 import { getBlockByTag, getBlockDebugTracesByTag } from "./extensions/index.js";
 
@@ -52,7 +52,7 @@ Trace variants are discriminated by `type`. Call and creation traces contain `fr
 `input`, and `output`. Destruction traces contain `from`, `to`, and `value`. Reward traces contain
 `to`, `value`, and `rewardType`.
 
-Block, transaction, and receipt fields preserve the exact `@purevm/public` types. Consequently,
+Block, transaction, and receipt fields preserve the exact `@purevm/rpc-public` types. Consequently,
 provider-level optional fields remain optional, pending block fields may be `null`, byte data may be
 `"0x"`, and quantities use forms such as `"0x0"`. The inspection scripts below reveal the actual
 shape returned by a selected provider and block.

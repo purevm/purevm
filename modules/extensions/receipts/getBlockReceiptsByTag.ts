@@ -1,4 +1,4 @@
-import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/public";
+import type { BlockTag, HttpClient, HttpRequestOptions } from "@purevm/rpc-public";
 
 import type { ReceiptsResult } from "../types.js";
 import { formatReceipts } from "./format-receipts.js";

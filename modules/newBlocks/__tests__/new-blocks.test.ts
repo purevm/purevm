@@ -4,7 +4,7 @@ import type {
   RpcSubscription,
   SubscriptionHandlers,
   WebSocketTransportOptions,
-} from "@purevm/public";
+} from "@purevm/rpc-public";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { NewBlocks } from "../new-blocks.js";

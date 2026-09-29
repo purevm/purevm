@@ -1,4 +1,4 @@
-import type { HttpClient, HttpRequestOptions } from "@purevm/public";
+import type { HttpClient, HttpRequestOptions } from "@purevm/rpc-public";
 
 import type { FetchContext } from "../fetch-context.js";
 import { createLimiter } from "../limiter.js";
