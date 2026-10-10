@@ -1,4 +1,4 @@
-import type { RpcBlock } from "@purevm/rpc-public";
+import type { RpcBlock } from "@purevm/public-client";
 
 import { ExtensionDataError } from "../errors/index.js";
 import type { BlockResult } from "../types.js";

@@ -7,7 +7,7 @@ import type {
   TraceEntry,
   TraceRewardEntry,
   TransactionHash,
-} from "@purevm/rpc-public";
+} from "@purevm/public-client";
 
 export type BlockData = Omit<RpcBlock<true>, "transactions">;
 export type TransactionTrace = Exclude<TraceEntry, TraceRewardEntry>;

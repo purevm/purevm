@@ -1,4 +1,4 @@
-import type { Hash } from "@purevm/rpc-public";
+import type { Hash } from "@purevm/public-client";
 
 import { ExtensionDataError } from "../errors/index.js";
 

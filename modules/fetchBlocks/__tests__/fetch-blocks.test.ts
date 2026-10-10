@@ -9,7 +9,7 @@ import {
   type RpcLog,
   type TraceEntry,
   type TraceFilterParameters,
-} from "@purevm/rpc-public";
+} from "@purevm/public-client";
 import { describe, expect, test, vi } from "vitest";
 
 import { fetchBlocks } from "../fetch-blocks.js";

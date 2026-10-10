@@ -8,7 +8,7 @@ import type {
   RpcTransactionReceipt,
   TraceRewardType,
   TransactionHash,
-} from "@purevm/rpc-public";
+} from "@purevm/public-client";
 
 export type Block = Omit<RpcBlock<true>, "transactions">;
 export type TransactionsByHash = Record<TransactionHash, RpcTransaction>;

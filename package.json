@@ -17,7 +17,7 @@
         "version-packages": "changeset version && pnpm install --lockfile-only"
     },
     "dependencies": {
-        "@purevm/rpc-public": "*"
+        "@purevm/public-client": "*"
     },
     "devDependencies": {
         "@changesets/cli": "^3.0.3",

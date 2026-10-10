@@ -1,4 +1,4 @@
-import type { RpcLog } from "@purevm/rpc-public";
+import type { RpcLog } from "@purevm/public-client";
 
 import type { BlockBuilder } from "./block-builder.types.js";
 import { FetchBlocksDataError } from "./FetchBlocksDataError.js";

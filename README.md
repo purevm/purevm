@@ -4,25 +4,25 @@ Monorepo for the `@purevm` npm scope.
 
 ## Packages
 
-| Package                                             | Path                     | Description                                                      |
-| --------------------------------------------------- | ------------------------ | ---------------------------------------------------------------- |
-| [`@purevm/rpc-public`](./packages/rpc-public)       | `packages/rpc-public`    | Read-only public actions for EVM chains over HTTP and WebSocket |
+| Package                                             | Path                     | Description                                                     |
+| --------------------------------------------------- | ------------------------ | --------------------------------------------------------------- |
+| [`@purevm/public-client`](./packages/public-client) | `packages/public-client` | Read-only public actions for EVM chains over HTTP and WebSocket |
 | [`@purevm/rpc-transport`](./packages/rpc-transport) | `packages/rpc-transport` | Small JSON-RPC transports for HTTP and WebSocket                |
 
 Install packages independently:
 
 ```bash
-pnpm add @purevm/rpc-public
+pnpm add @purevm/public-client
 ```
 
-`@purevm/wallet` will live in `packages/wallet` when it is added.
+`@purevm/wallet-client` will live in `packages/wallet-client` when it is added.
 
 ## Development
 
 ```bash
 pnpm install
 pnpm --filter @purevm/rpc-transport validate
-pnpm --filter @purevm/rpc-public validate
+pnpm --filter @purevm/public-client validate
 ```
 
 Formatting and linting are configured once at the root (`.oxfmtrc.json`, `.oxlintrc.json`) and run

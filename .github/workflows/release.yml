@@ -37,7 +37,7 @@ jobs:
 
       - run: pnpm --filter @purevm/rpc-transport validate
 
-      - run: pnpm --filter @purevm/rpc-public validate
+      - run: pnpm --filter @purevm/public-client validate
 
       # With pending changesets this opens a "version packages" pull request. Once that pull
       # request is merged, it publishes every package version missing from npm.

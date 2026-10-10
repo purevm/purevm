@@ -1,5 +1,5 @@
 {
-    "name": "@purevm/rpc-public",
+    "name": "@purevm/public-client",
     "version": "0.1.0",
     "description": "Typed read-only public actions for EVM chains over HTTP and WebSocket.",
     "keywords": [
@@ -13,7 +13,7 @@
         "typescript",
         "websocket"
     ],
-    "homepage": "https://github.com/yog4a/purevm/tree/main/packages/rpc-public#readme",
+    "homepage": "https://github.com/yog4a/purevm/tree/main/packages/public-client#readme",
     "bugs": {
         "url": "https://github.com/yog4a/purevm/issues"
     },
@@ -22,7 +22,7 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/purevm/purevm.git",
-        "directory": "packages/rpc-public"
+        "directory": "packages/public-client"
     },
     "files": [
         "dist",
@@ -39,6 +39,11 @@
             "types": "./dist/index.d.mts",
             "import": "./dist/index.mjs",
             "default": "./dist/index.mjs"
+        },
+        "./actions": {
+            "types": "./dist/actions.d.mts",
+            "import": "./dist/actions.mjs",
+            "default": "./dist/actions.mjs"
         },
         "./utils": {
             "types": "./dist/utils.d.mts",

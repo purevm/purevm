@@ -6,7 +6,7 @@ import type {
   TraceCallEntry,
   TraceRewardEntry,
   TransactionHash,
-} from "@purevm/rpc-public";
+} from "@purevm/public-client";
 import { describe, expect, test } from "vitest";
 
 import { assembleBlocks } from "../assemble-blocks.js";

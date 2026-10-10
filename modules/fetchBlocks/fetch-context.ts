@@ -1,4 +1,4 @@
-import type { HttpClient, HttpRequestOptions } from "@purevm/rpc-public";
+import type { HttpClient, HttpRequestOptions } from "@purevm/public-client";
 
 import type { Limiter } from "./limiter.js";
 

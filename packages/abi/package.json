@@ -1,0 +1,47 @@
+{
+  "name": "@gobbl3r/abi",
+  "version": "0.3.0",
+  "description": "Strict, compiled ABI decoding for event logs: rejects anything but the canonical encoding (extra topics, trailing data, non-canonical offsets, dirty padding).",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gobbl3r/packages.git",
+    "directory": "packages/abi"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "@gobbl3r/source": "./src/index.ts",
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --project unit",
+    "test:integ": "vitest run --project integ --passWithNoTests",
+    "build": "tsdown",
+    "validate": "pnpm run format:check && pnpm run lint:check && pnpm run typecheck && pnpm run test && pnpm run build",
+    "prepublishOnly": "pnpm run validate",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint --fix .",
+    "lint:check": "oxlint .",
+    "bench": "node scripts/bench.ts"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.4.0"
+  },
+  "devDependencies": {
+    "viem": "^2.56.9"
+  },
+  "engines": {
+    "node": ">=26"
+  }
+}

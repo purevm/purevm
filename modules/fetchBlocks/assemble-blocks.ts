@@ -1,4 +1,4 @@
-import type { RpcBlock, RpcLog, TraceEntry } from "@purevm/rpc-public";
+import type { RpcBlock, RpcLog, TraceEntry } from "@purevm/public-client";
 
 import { createBlockBuilder } from "./block.builder.js";
 import { finalizeBlock } from "./block.finalize.js";

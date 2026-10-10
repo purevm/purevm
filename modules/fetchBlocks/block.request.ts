@@ -1,4 +1,4 @@
-import type { RpcBlock } from "@purevm/rpc-public";
+import type { RpcBlock } from "@purevm/public-client";
 
 import type { FetchContext } from "./fetch-context.js";
 import { FetchBlocksDataError } from "./FetchBlocksDataError.js";

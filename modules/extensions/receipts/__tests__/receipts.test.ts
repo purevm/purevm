@@ -5,7 +5,7 @@ import type {
   HttpRequestOptions,
   RpcTransactionReceipt,
   TransactionHash,
-} from "@purevm/rpc-public";
+} from "@purevm/public-client";
 import { describe, expect, it, vi } from "vitest";
 
 import { ExtensionDataError } from "../../errors/index.js";

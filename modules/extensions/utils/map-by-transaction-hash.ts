@@ -1,4 +1,4 @@
-import type { TransactionHash } from "@purevm/rpc-public";
+import type { TransactionHash } from "@purevm/public-client";
 
 import { ExtensionDataError } from "../errors/index.js";
 import { normalizeHash } from "./hash.js";

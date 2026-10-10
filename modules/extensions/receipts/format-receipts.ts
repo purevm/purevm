@@ -1,4 +1,4 @@
-import type { RpcTransactionReceipt } from "@purevm/rpc-public";
+import type { RpcTransactionReceipt } from "@purevm/public-client";
 
 import { ExtensionDataError } from "../errors/index.js";
 import type { ReceiptsResult } from "../types.js";

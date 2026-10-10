@@ -6,7 +6,7 @@ import type {
   WebSocketLike,
   WebSocketListener,
   WebSocketTransportOptions,
-} from "@purevm/rpc-public";
+} from "@purevm/public-client";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { NewBlocksWebSocketClient } from "../types.js";

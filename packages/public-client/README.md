@@ -1,13 +1,13 @@
-# @purevm/rpc-public
+# @purevm/public-client
 
 Typed public actions for EVM chains: every read-only JSON-RPC method a node exposes, over HTTP and
-WebSocket. Signing and transaction submission belong to `@purevm/wallet`. The only runtime
+WebSocket. Signing and transaction submission belong to `@purevm/wallet-client`. The only runtime
 dependency is `@purevm/rpc-transport`, re-exported from this package.
 
 ## Install
 
 ```bash
-pnpm add @purevm/rpc-public
+pnpm add @purevm/public-client
 ```
 
 The package is ESM-only and requires Node.js 22.18 or newer.
@@ -15,7 +15,7 @@ The package is ESM-only and requires Node.js 22.18 or newer.
 ## HTTP Client
 
 ```ts
-import { createHttpClient } from "@purevm/rpc-public";
+import { createHttpClient } from "@purevm/public-client";
 
 const client = createHttpClient({
   url: "https://ethereum-rpc.publicnode.com",
@@ -43,7 +43,7 @@ Every method that needs input takes a single parameters object, followed by opti
 options. Methods without input take only the request options:
 
 ```ts
-import { createHttpClient } from "@purevm/rpc-public";
+import { createHttpClient } from "@purevm/public-client";
 
 const client = createHttpClient({ url: "https://ethereum-rpc.publicnode.com" });
 
@@ -210,7 +210,7 @@ Erigon, Reth, or Nethermind; historical Parity nodes only accept numbers and tag
 the node returns. Narrowing on a known type stays exact:
 
 ```ts
-import type { RpcTransaction } from "@purevm/rpc-public";
+import type { RpcTransaction } from "@purevm/public-client";
 
 function describe(transaction: RpcTransaction): string {
   if (transaction.type === "0x2") return `EIP-1559, max fee ${transaction.maxFeePerGas}`;
@@ -232,7 +232,7 @@ account's `balance`, `nonce`, `code`, full `state`, or individual `stateDiff` sl
 Overrides are only sent when provided, so calls without them stay compatible with every node.
 
 ```ts
-import { createHttpClient } from "@purevm/rpc-public";
+import { createHttpClient } from "@purevm/public-client";
 
 const client = createHttpClient({ url: "https://ethereum-rpc.publicnode.com" });
 const token = "0x0000000000000000000000000000000000000001";
@@ -256,7 +256,7 @@ They are available on both `HttpClient` and `WebSocketClient`. Content is keyed 
 then by decimal nonce:
 
 ```ts
-import { createHttpClient } from "@purevm/rpc-public";
+import { createHttpClient } from "@purevm/public-client";
 
 const client = createHttpClient({ url: "http://localhost:8545" });
 
@@ -293,7 +293,7 @@ Every configuration also accepts `timeout` (a Go duration such as `"5s"`) and `r
 `debug_traceCall` additionally accepts `stateOverrides` and `blockOverrides`.
 
 ```ts
-import { createHttpClient } from "@purevm/rpc-public";
+import { createHttpClient } from "@purevm/public-client";
 
 const client = createHttpClient({ url: "https://ethereum-rpc.publicnode.com" });
 
@@ -322,7 +322,7 @@ transaction, for example after `timeout`.
 ## WebSocket Client
 
 ```ts
-import { createWebSocketClient } from "@purevm/rpc-public";
+import { createWebSocketClient } from "@purevm/public-client";
 
 const client = createWebSocketClient({
   url: "wss://ethereum-rpc.publicnode.com",
@@ -360,7 +360,7 @@ Every regular client method accepts request options as its final argument. HTTP 
 accept per-request headers.
 
 ```ts
-import { createHttpClient } from "@purevm/rpc-public";
+import { createHttpClient } from "@purevm/public-client";
 
 const client = createHttpClient({
   url: "https://ethereum-rpc.publicnode.com",
@@ -385,7 +385,8 @@ const balance = await client.ethGetBalanceByTag(
 Actions are exported separately for composition with any structurally compatible typed requester.
 
 ```ts
-import { HttpTransport, ethGetBlockByHash } from "@purevm/rpc-public";
+import { HttpTransport } from "@purevm/public-client";
+import { ethGetBlockByHash } from "@purevm/public-client/actions";
 
 const transport = new HttpTransport({
   url: "https://ethereum-rpc.publicnode.com",
@@ -407,8 +408,8 @@ JSON-RPC returns quantities as hex strings. Conversion helpers live in a separat
 applications that do not need them do not load them:
 
 ```ts
-import { createHttpClient } from "@purevm/rpc-public";
-import { formatEther, hexToBigInt, hexToNumber, toQuantity } from "@purevm/rpc-public/utils";
+import { createHttpClient } from "@purevm/public-client";
+import { formatEther, hexToBigInt, hexToNumber, toQuantity } from "@purevm/public-client/utils";
 
 const client = createHttpClient({ url: "https://ethereum-rpc.publicnode.com" });
 

@@ -9,7 +9,7 @@ import type {
   TraceRewardEntry,
   TraceSuicideEntry,
   TransactionHash,
-} from "@purevm/rpc-public";
+} from "@purevm/public-client";
 import { describe, expect, it, vi } from "vitest";
 
 import { NULL_TRANSACTION_HASH } from "../../constants.js";

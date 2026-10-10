@@ -1,4 +1,4 @@
-import type { TraceEntry } from "@purevm/rpc-public";
+import type { TraceEntry } from "@purevm/public-client";
 
 import type { FetchContext } from "./fetch-context.js";
 import { FetchBlocksDataError } from "./FetchBlocksDataError.js";

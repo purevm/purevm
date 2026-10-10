@@ -13,7 +13,7 @@
  * Setup: put the variables in the monorepo root `.env` (loaded by `vitest.integ.setup.ts`) or
  * export them in the shell. No other service needs to be started.
  *
- * Run from `packages/rpc-public` with `pnpm test:integ`. Unit tests (`pnpm test`) never run these, so
+ * Run from `packages/public-client` with `pnpm test:integ`. Unit tests (`pnpm test`) never run these, so
  * they can run in any order relative to them.
  */
 import { expect, test } from "vitest";

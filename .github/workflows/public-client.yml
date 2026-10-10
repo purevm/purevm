@@ -1,25 +1,25 @@
-name: RPC public
+name: Public client
 
 on:
   push:
     branches: [main]
     paths:
-      - ".github/workflows/rpc-public.yml"
+      - ".github/workflows/public-client.yml"
       - ".oxfmtrc.json"
       - ".oxlintrc.json"
       - "package.json"
-      - "packages/rpc-public/**"
+      - "packages/public-client/**"
       - "packages/rpc-transport/**"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "tsconfig.base.json"
   pull_request:
     paths:
-      - ".github/workflows/rpc-public.yml"
+      - ".github/workflows/public-client.yml"
       - ".oxfmtrc.json"
       - ".oxlintrc.json"
       - "package.json"
-      - "packages/rpc-public/**"
+      - "packages/public-client/**"
       - "packages/rpc-transport/**"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -29,12 +29,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: rpc-public-${{ github.ref }}
+  group: public-client-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
-    name: Validate rpc-public
+    name: Validate public client
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -53,4 +53,4 @@ jobs:
 
       - run: pnpm --filter @purevm/rpc-transport build
 
-      - run: pnpm --filter @purevm/rpc-public validate
+      - run: pnpm --filter @purevm/public-client validate
